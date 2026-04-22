@@ -1,0 +1,23 @@
+.logoContainer {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.logoText {
+  font-family: 'General Sans', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.05em;
+  /* Removed bg, border, and padding as per user request */
+}
+
+@media (prefers-color-scheme: dark) {
+  .logoText {
+    /* No bg for dark mode either */
+  }
+}

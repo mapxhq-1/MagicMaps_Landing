@@ -1,0 +1,146 @@
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;600;700&family=Cinzel:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+  /* Ancient Indian & Sandstone Palette */
+  --text: #3e2723;
+  --text-h: #1f1008;
+  --bg: #f4ecdf;
+  --border: #dcbfa2;
+  --code-bg: #e1d2c1;
+  --accent: #c4820f;
+  --accent-light: #f5b041;
+  --accent-bg: rgba(196, 130, 15, 0.1);
+  --accent-border: rgba(196, 130, 15, 0.5);
+  --social-bg: rgba(225, 210, 193, 0.5);
+  
+  /* Earthy shadows */
+  --shadow: rgba(62, 39, 35, 0.1) 0 10px 15px -3px, rgba(62, 39, 35, 0.05) 0 4px 6px -2px;
+
+  /* Typography */
+  --sans: 'General Sans', system-ui, sans-serif;
+  --serif: 'Lora', Georgia, serif;
+  --heading: 'Cinzel', serif;
+  --heading-dec: 'Cinzel Decorative', serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--serif);
+  letter-spacing: 0.18px;
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Ccircle cx='50' cy='150' r='1.5' fill='%23c4820f' opacity='0.8'/%3E%3Ccircle cx='250' cy='50' r='1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='350' cy='250' r='2' fill='%23f5b041' opacity='0.5'/%3E%3Ccircle cx='120' cy='320' r='1' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='300' cy='380' r='1.5' fill='%23c4820f' opacity='0.6'/%3E%3Cpath d='M200 195 L202 200 L207 202 L202 204 L200 209 L198 204 L193 202 L198 200 Z' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(244,236,223,0) 100%),
+    linear-gradient(-45deg, rgba(0,0,0,0.02) 0%, rgba(244,236,223,0) 100%);
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: transparent;
+  position: relative; /* Context for pseudo elements */
+}
+
+/* Global Background Watermark - Repeating Lotus Pattern */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg transform='translate(60,80)' stroke='%233e2723' stroke-width='1.5' fill='none' opacity='0.2'%3E%3Cpath d='M0,-45 C12,-20 15,0 0,10 C-15,0 -12,-20 0,-45 Z' /%3E%3Cpath d='M0,10 C18,5 35,-12 30,-30 C15,-20 8,-5 0,10 Z' /%3E%3Cpath d='M0,10 C-18,5 -35,-12 -30,-30 C-15,-20 -8,-5 0,10 Z' /%3E%3C/g%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  background-repeat: repeat;
+  background-position: top left;
+  opacity: 0.2; /* Subtle pattern opacity */
+}
+
+/* Thin Curved Branches - Corners */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 800px;
+  pointer-events: none;
+  z-index: 20;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 400'%3E%3Cpath d='M80 0 C 130 100, 20 200, 70 300 C 120 400, 40 450, 50 500' fill='none' stroke='%233e2723' stroke-width='1.5' opacity='0.4' stroke-linecap='round'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 400'%3E%3Cpath d='M80 0 C 130 100, 20 200, 70 300 C 120 400, 40 450, 50 500' fill='none' stroke='%233e2723' stroke-width='1.5' opacity='0.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-position: left 0px top 0px, right 0px top 0px;
+  background-size: 150px 600px, 150px 600px;
+  transform: scaleX(-1); /* mirror mapping */
+}
+
+#root {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--heading);
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+h1 {
+  font-family: var(--heading-dec);
+  font-size: 64px;
+  letter-spacing: 2px;
+  margin: 32px 0;
+
+  @media (max-width: 1024px) {
+    font-size: 40px;
+    margin: 20px 0;
+  }
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 120%;
+  letter-spacing: 1px;
+  margin: 0 0 12px;
+
+  @media (max-width: 1024px) {
+    font-size: 24px;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}

@@ -1,0 +1,30 @@
+.hero,
+.spacer-section,
+.footer-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 8rem 2rem;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+}
+
+.spacer-section h1,
+.footer-section h1 {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-h);
+  text-shadow: 2px 2px 4px rgba(62, 39, 35, 0.1);
+}
+
+.spacer-section p,
+.footer-section p {
+  font-size: 1.6rem;
+  opacity: 0.85;
+  color: var(--text);
+  max-width: 800px;
+  line-height: 1.6;
+}
