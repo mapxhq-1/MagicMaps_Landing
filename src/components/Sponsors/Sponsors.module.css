@@ -1,100 +1,112 @@
 .wrapper {
   width: 100%;
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Thin rim light where this strip meets the videos — reads like a recessed groove */
+.wrapper::before,
+.wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+.wrapper::before {
+  top: 0;
+}
+
+.wrapper::after {
+  bottom: 0;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 5rem 2rem;
+  gap: 1.25rem;
+  padding: 2rem 2rem 2.25rem;
   width: 100%;
   box-sizing: border-box;
-  
-  /* Ancient temple stone trench effect */
-  background: linear-gradient(
-    to bottom,
-    #cfb598 0%,
-    #d8c1a6 12%,
-    #ebd5bb 85%,
-    #f2dfc7 100%
-  );
-  
-  /* Deep layered carved shadow effect, warm tones */
-  box-shadow: 
-    inset 0px 15px 30px rgba(62, 39, 35, 0.3),
-    inset 0px 40px 70px rgba(62, 39, 35, 0.15),
-    inset 0px -10px 20px rgba(255, 248, 235, 0.7),
-    inset 0px -30px 60px rgba(255, 248, 235, 0.5);
-    
-  border-top: 1px solid rgba(62, 39, 35, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+
+  background-color: #020202;
+  background-image:
+    radial-gradient(ellipse 90% 120% at 50% 50%, rgba(12, 12, 12, 0.55) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, transparent 42%, transparent 58%, rgba(0, 0, 0, 0.92) 100%);
+
+  /* Recessed “channel” — heavy inset shadow top & bottom */
+  box-shadow:
+    inset 0 36px 72px -14px rgba(0, 0, 0, 0.92),
+    inset 0 -36px 72px -14px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+
+  border-top: 1px solid rgba(0, 0, 0, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
+
   position: relative;
-  z-index: 10;
-  overflow: hidden; /* Hide lotus clipping out of bounds */
+  overflow: hidden;
 }
 
-/* Lotus and ancient design embed */
-.container::before {
-  content: "";
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
-  pointer-events: none;
-  background-image: 
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath d='M50 5 Q80 35 50 55 Q20 35 50 5 Z' fill='%23c4820f' opacity='0.25'/%3E%3Cpath d='M50 55 Q90 55 85 25 Q60 30 50 55 Z' fill='%23c4820f' opacity='0.2'/%3E%3Cpath d='M50 55 Q10 55 15 25 Q40 30 50 55 Z' fill='%23c4820f' opacity='0.2'/%3E%3Cpath d='M50 55 Q100 55 95 35 Q70 45 50 55 Z' fill='%238b3a2b' opacity='0.15'/%3E%3Cpath d='M50 55 Q0 55 5 35 Q30 45 50 55 Z' fill='%238b3a2b' opacity='0.15'/%3E%3C/svg%3E"),
-    url("../../assets/mandala.svg");
-  background-position: center bottom -10px, left -150px center;
-  background-size: 150px, 500px;
-  background-repeat: no-repeat, no-repeat;
-  opacity: 1; /* Base container opacity */
-  z-index: 0;
-}
-
-.container h2 {
-  font-size: 2.2rem;
-  color: var(--text-h);
+.title {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #8b9390;
+  opacity: 0.38;
   margin: 0;
-  font-family: var(--heading-dec);
-  letter-spacing: 2px;
-  text-shadow: -1px -1px 2px rgba(255,255,255,0.4), 1px 1px 2px rgba(62,39,35,0.2);
+  padding-left: 0.35em;
+  font-family: var(--sans);
+  line-height: 1.4;
 }
 
 .icons {
   display: flex;
-  gap: 2.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
+  align-items: center;
+  gap: clamp(1.15rem, 4vw, 2rem);
 }
 
 .circle {
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  
-  /* Single color closely matching the local trench background */
-  background: #ebd5bb;
-  border: 1px solid rgba(196, 130, 15, 0.15);
-  
-  box-shadow: 
-    0 4px 10px rgba(62, 39, 35, 0.1);
-    
+  flex-shrink: 0;
+
+  background: radial-gradient(circle at 30% 25%, #151515 0%, #0a0a0a 55%, #060606 100%);
+  border: 1px solid rgba(255, 255, 255, 0.045);
+
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.02),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-h);
-  transition: all 0.3s ease;
+  color: rgba(200, 208, 203, 0.42);
+  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .circle:hover {
-  transform: translateY(-5px);
-  background: #f1dfc9; /* slightly brighter match */
-  box-shadow: 
-    0 8px 16px rgba(62, 39, 35, 0.15);
+  color: rgba(210, 218, 213, 0.58);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .circle:active {
-  transform: translateY(0);
-  background: #d8c1a6; /* darker match deeper in the gradient */
-  box-shadow: 
-    inset 0 4px 8px rgba(62, 39, 35, 0.1);
+  color: rgba(200, 208, 203, 0.42);
 }

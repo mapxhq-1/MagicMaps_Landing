@@ -1,20 +1,29 @@
 import React from 'react';
-import { Apple } from 'lucide-react';
+import { Apple, Sparkles, Gem, Shield } from 'lucide-react';
 import styles from './Sponsors.module.css';
+
+const iconSize = 18;
 
 export default function Sponsors() {
   return (
-    <section className={styles.wrapper}>
+    <section className={styles.wrapper} aria-label="Backed by funding partners">
       <div className={styles.container}>
-        <h2>Backed by:</h2>
+        <p className={styles.title}>Backed by</p>
         <div className={styles.icons}>
-          <div className={styles.circle}><Apple size={28} /></div>
-          {/* <div className={styles.circle}><Twitch size={28} /></div> */}
-          {/* <div className={styles.circle}><Twitter size={28} /></div> */}
-          {/* <div className={styles.circle}><Github size={28} /></div> */}
-          {/* <div className={styles.circle}><Figma size={28}/></div> */}
+          <div className={styles.circle} aria-hidden>
+            <Apple size={iconSize} />
+          </div>
+          <div className={styles.circle} aria-hidden>
+            <Sparkles size={iconSize} />
+          </div>
+          <div className={styles.circle} aria-hidden>
+            <Gem size={iconSize} />
+          </div>
+          <div className={styles.circle} aria-hidden>
+            <Shield size={iconSize} />
+          </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

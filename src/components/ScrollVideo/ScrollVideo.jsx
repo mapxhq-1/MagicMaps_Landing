@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowRight } from 'lucide-react';
+import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
 import styles from './ScrollVideo.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -61,10 +61,9 @@ export default function ScrollVideo({ videoSrc }) {
           preload="auto"
           style={{ opacity: isLoaded ? 1 : 0 }}
         ></video>
-        <button className={styles.exploreBtn}>
-          Let's Explore
-          <ArrowRight className={styles.exploreIcon} size={20} />
-        </button>
+        <div className={styles.exploreBtnWrap}>
+          <NeonCtaButton>Let&apos;s Explore</NeonCtaButton>
+        </div>
       </div>
     </div>
   );

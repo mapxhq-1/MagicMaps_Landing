@@ -1,50 +1,85 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 3rem;
-  background: rgba(212, 175, 55, 0.05); /* very slight gold tint */
-  border-radius: 40px;
-  border: 1px solid rgba(196, 130, 15, 0.3); /* saffron border */
-  box-shadow: 0 10px 30px rgba(62, 39, 35, 0.1);
+.footer {
+  width: 100%;
+  background: #000000;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.75rem;
+  box-sizing: border-box;
   position: relative;
   z-index: 10;
 }
 
-.email {
+.inner {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.contactBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.contact {
+  font-family: var(--sans);
+  font-size: clamp(0.65rem, 1.35vw, 0.78rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: rgba(240, 248, 241, 0.62);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact:hover {
+  color: rgba(240, 248, 241, 0.92);
+}
+
+.social {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 1.5rem;
-  font-weight: 500;
-  font-family: var(--heading);
-  color: var(--text-h);
-  text-decoration: none;
-  padding: 16px 32px;
-  border-radius: 50px;
-  background: linear-gradient(145deg, #f5eedf, #ebd5bb);
-  border: 1px solid rgba(196, 130, 15, 0.4);
-  box-shadow: 
-    inset 2px 2px 5px rgba(255, 255, 255, 0.5),
-    inset -2px -2px 5px rgba(62, 39, 35, 0.1),
-    0 5px 15px rgba(62, 39, 35, 0.1);
-  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-}
-
-.email:hover {
-  transform: scale(1.05);
-  background: linear-gradient(145deg, #fbf7f0, #e4cdae);
-  box-shadow: 
-    inset 2px 2px 5px rgba(255, 255, 255, 0.7),
-    inset -2px -2px 5px rgba(62, 39, 35, 0.1),
-    0 8px 20px rgba(62, 39, 35, 0.15);
-}
-
-.built {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 1.2rem;
-  color: var(--text);
+  gap: 0.45rem;
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
+
+.socialBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(240, 248, 241, 0.55);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.socialBtn:hover {
+  color: rgba(240, 248, 241, 0.88);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.legal {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.1rem;
+  width: 100%;
+}
+
+.legalLine {
+  font-family: var(--sans);
+  font-size: clamp(0.58rem, 1.15vw, 0.68rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(215, 225, 216, 0.38);
+  margin: 0;
+  line-height: 1.5;
+  text-align: right;
+}
+
