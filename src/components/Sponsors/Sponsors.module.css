@@ -4,9 +4,12 @@
   z-index: 1;
   isolation: isolate;
   overflow: hidden;
+
+  /* Lighter charcoal “surface” — reads above pure #000 so the groove can sink */
+  background: linear-gradient(180deg, #161616 0%, #121212 50%, #161616 100%);
 }
 
-/* Thin rim light where this strip meets the videos — reads like a recessed groove */
+/* Rim light against ScrollVideo / quote blacks */
 .wrapper::before,
 .wrapper::after {
   content: '';
@@ -19,7 +22,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.055) 50%,
     transparent 100%
   );
 }
@@ -32,32 +35,38 @@
   bottom: 0;
 }
 
+/* Inset margins reveal the charcoal frame — sunken tray like reference UI */
+.surface {
+  /* Narrower side gutters — wider tray; vertical unchanged */
+  padding: 10px clamp(0.35rem, 2vw, 1rem) 12px;
+  box-sizing: border-box;
+}
+
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
-  padding: 2rem 2rem 2.25rem;
+  padding: 2rem 1.75rem 2.25rem;
   width: 100%;
+  max-width: min(96rem, 100%);
+  margin: 0 auto;
   box-sizing: border-box;
 
-  background-color: #020202;
-  background-image:
-    radial-gradient(ellipse 90% 120% at 50% 50%, rgba(12, 12, 12, 0.55) 0%, transparent 62%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, transparent 42%, transparent 58%, rgba(0, 0, 0, 0.92) 100%);
+  border-radius: 14px;
 
-  /* Recessed “channel” — heavy inset shadow top & bottom */
+  /* No second fill — sits on the charcoal band; depth from shading only */
+  background: transparent;
+
+  /* Soft basin: darkens the strip locally without a solid black box */
   box-shadow:
-    inset 0 36px 72px -14px rgba(0, 0, 0, 0.92),
-    inset 0 -36px 72px -14px rgba(0, 0, 0, 0.92),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.6);
+    inset 0 22px 48px -12px rgba(0, 0, 0, 0.42),
+    inset 0 3px 0 rgba(0, 0, 0, 0.22),
+    inset 0 -2px 14px rgba(0, 0, 0, 0.18);
 
-  border-top: 1px solid rgba(0, 0, 0, 0.85);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.85);
-
+  border: none;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .title {
@@ -66,11 +75,12 @@
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: #8b9390;
-  opacity: 0.38;
+  opacity: 0.56;
   margin: 0;
   padding-left: 0.35em;
-  font-family: var(--sans);
-  line-height: 1.4;
+  font-family: 'General Sans', system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 .icons {
@@ -82,31 +92,63 @@
 }
 
 .circle {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
+  cursor: pointer;
 
-  background: radial-gradient(circle at 30% 25%, #151515 0%, #0a0a0a 55%, #060606 100%);
-  border: 1px solid rgba(255, 255, 255, 0.045);
+  background: radial-gradient(circle at 28% 22%, #161616 0%, #080808 52%, #030303 100%);
+  border: 1px solid rgba(255, 255, 255, 0.038);
 
   box-shadow:
-    inset 0 2px 6px rgba(0, 0, 0, 0.65),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.02),
-    0 2px 8px rgba(0, 0, 0, 0.45);
+    inset 0 3px 10px rgba(0, 0, 0, 0.78),
+    inset 2px 2px 6px rgba(0, 0, 0, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.025),
+    0 3px 10px rgba(0, 0, 0, 0.55);
 
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(200, 208, 203, 0.42);
-  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  color: rgba(185, 192, 187, 0.38);
+  transition:
+    transform 0.38s cubic-bezier(0.34, 1.45, 0.48, 1),
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.38s ease,
+    filter 0.3s ease;
 }
 
 .circle:hover {
-  color: rgba(210, 218, 213, 0.58);
-  border-color: rgba(255, 255, 255, 0.06);
+  transform: translateY(-4px) scale(1.08);
+  color: rgba(235, 242, 237, 0.82);
+  border-color: rgba(255, 255, 255, 0.14);
+  filter: brightness(1.2);
+  box-shadow:
+    inset 0 3px 12px rgba(0, 0, 0, 0.55),
+    inset 2px 2px 8px rgba(0, 0, 0, 0.42),
+    inset 0 -2px 1px rgba(255, 255, 255, 0.06),
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 4px 28px rgba(80, 210, 145, 0.22),
+    0 0 36px rgba(60, 190, 125, 0.14);
 }
 
 .circle:active {
-  color: rgba(200, 208, 203, 0.42);
+  transform: translateY(-1px) scale(1.03);
+  color: rgba(205, 212, 207, 0.62);
+  filter: brightness(1.05);
+}
+
+@media (max-width: 480px) {
+  .surface {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    border-radius: 12px;
+  }
 }
