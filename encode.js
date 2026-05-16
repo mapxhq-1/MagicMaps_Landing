@@ -8,13 +8,21 @@ const encodeVideo = (inputName, outputName) => {
   return new Promise((resolve, reject) => {
     const inputPath = path.join(process.cwd(), 'src/assets/videos', inputName);
     const outputPath = path.join(process.cwd(), 'src/assets/videos', outputName);
-    
+
     console.log(`Starting encoding for ${inputName}...`);
+
     ffmpeg(inputPath)
       .outputOptions([
-        '-vcodec libx264',
-        '-x264-params keyint=1', // The magic flag to put a keyframe on every single frame!
-        '-acodec copy', // copy audio just in case
+        '-c:v libx264',
+        '-preset slow',
+        '-crf 28',
+        '-pix_fmt yuv420p',
+        '-movflags +faststart',
+        '-g 6',
+        '-keyint_min 6',
+        '-sc_threshold 0',
+        '-vf scale=1280:-1',
+        '-an'
       ])
       .on('end', () => {
         console.log(`Finished encoding ${outputName}`);
