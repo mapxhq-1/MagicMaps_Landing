@@ -1,4 +1,5 @@
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 :root {
   /* Dark theme palette */
@@ -12,7 +13,7 @@
   --accent-bg: rgba(168, 230, 176, 0.14);
   --accent-border: rgba(168, 230, 176, 0.45);
   --social-bg: rgba(30, 30, 30, 0.7);
-  
+  --quote-display: 'Playfair Display', serif;
   /* Earthy shadows */
   --shadow: rgba(0, 0, 0, 0.5) 0 10px 15px -3px, rgba(0, 0, 0, 0.35) 0 4px 6px -2px;
 
@@ -22,15 +23,13 @@
   --heading: 'General Sans', system-ui, sans-serif;
   --heading-dec: 'General Sans', system-ui, sans-serif;
   --mono: 'General Sans', system-ui, sans-serif;
-  /* Main quote line uses General Sans (same as UI sans) */
-  --quote-display: var(--sans);
 
   font: 18px/145% var(--serif);
   letter-spacing: 0.18px;
   color-scheme: dark;
   color: var(--text);
   background: var(--bg);
-  
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

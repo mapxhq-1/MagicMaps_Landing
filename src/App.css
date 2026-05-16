@@ -85,3 +85,7 @@
   position: relative;
   z-index: 10;
 }
+
+.quote-text {
+  font-family: 'Playfair Display', serif;
+}

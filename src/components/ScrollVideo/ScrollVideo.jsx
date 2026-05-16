@@ -31,7 +31,7 @@ export default function ScrollVideo({ videoSrc }) {
 
   useGSAP(() => {
     if (!isLoaded || !videoRef.current) return;
-    
+
     const video = videoRef.current;
     if (isNaN(video.duration) || video.duration === 0) return;
 
@@ -53,7 +53,7 @@ export default function ScrollVideo({ videoSrc }) {
     <div className={styles.scrollContainer} ref={containerRef}>
       <div className={styles.stickyContainer}>
         {!isLoaded && <div className={styles.loader}>Loading Video Buffer...</div>}
-        <video 
+        <video
           ref={videoRef}
           className={styles.video}
           playsInline
@@ -62,7 +62,7 @@ export default function ScrollVideo({ videoSrc }) {
           style={{ opacity: isLoaded ? 1 : 0 }}
         ></video>
         <div className={styles.exploreBtnWrap}>
-          <NeonCtaButton>Let&apos;s Explore</NeonCtaButton>
+          <NeonCtaButton>Try Now</NeonCtaButton>
         </div>
       </div>
     </div>
