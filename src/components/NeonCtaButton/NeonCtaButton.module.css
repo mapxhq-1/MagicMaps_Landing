@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  text-decoration: none;
   padding: 0.68rem 1.85rem;
   border-radius: 9999px;
   border: none;

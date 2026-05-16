@@ -1,5 +1,5 @@
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
 
 :root {
   /* Dark theme palette */
@@ -13,7 +13,7 @@
   --accent-bg: rgba(168, 230, 176, 0.14);
   --accent-border: rgba(168, 230, 176, 0.45);
   --social-bg: rgba(30, 30, 30, 0.7);
-  --quote-display: 'Playfair Display', serif;
+  --quote-display: 'Cormorant Garamond', serif;
   /* Earthy shadows */
   --shadow: rgba(0, 0, 0, 0.5) 0 10px 15px -3px, rgba(0, 0, 0, 0.35) 0 4px 6px -2px;
 

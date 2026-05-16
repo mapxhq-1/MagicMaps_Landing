@@ -74,18 +74,15 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Centered neon CTA directly above footer */
+/* Centered neon CTA directly above footer — pulled up toward quote block */
 .pre-footer-cta {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding: 2.25rem 1.25rem 1.75rem;
+  margin-top: clamp(-12rem, -22vh, -7rem);
+  padding: 0.35rem 1.25rem 1.75rem;
   box-sizing: border-box;
   background: #000000;
   position: relative;
   z-index: 10;
-}
-
-.quote-text {
-  font-family: 'Playfair Display', serif;
 }

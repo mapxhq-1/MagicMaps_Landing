@@ -3,12 +3,10 @@
   position: relative;
   z-index: 1;
   isolation: isolate;
-  overflow: hidden;
-  /* Lighter charcoal “surface” */
+  overflow: visible;
   background: linear-gradient(180deg, #161616 0%, #121212 50%, #161616 100%);
 }
 
-/* Rim light against dark background */
 .wrapper::before,
 .wrapper::after {
   content: '';
@@ -32,9 +30,8 @@
   bottom: 0;
 }
 
-/* Inset margins reveal the charcoal frame */
 .surface {
-  padding: 10px clamp(0.35rem, 2vw, 1rem) 12px;
+  padding: 6px clamp(0.35rem, 2vw, 1rem) 12px;
   box-sizing: border-box;
 }
 
@@ -42,173 +39,155 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: 2rem 1.75rem 2.25rem;
+  gap: 0.9rem;
+  padding: 1rem 1.75rem 1.75rem;
   width: 100%;
   max-width: min(96rem, 100%);
   margin: 0 auto;
   box-sizing: border-box;
   border-radius: 14px;
   background: transparent;
-
-  /* Soft basin shadows */
   box-shadow:
     inset 0 22px 48px -12px rgba(0, 0, 0, 0.42),
     inset 0 3px 0 rgba(0, 0, 0, 0.22),
     inset 0 -2px 14px rgba(0, 0, 0, 0.18);
-
   border: none;
   position: relative;
   overflow: visible;
 }
 
 .title {
-  font-size: 0.65rem;
-  font-weight: 400;
-  letter-spacing: 0.35em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: clamp(0.62rem, 1.25vw, 0.72rem);
+  font-weight: 500;
   text-transform: uppercase;
-  color: #8b9390;
-  opacity: 0.56;
+  color: rgba(145, 152, 145, 0.72);
   margin: 0;
-  padding-left: 0.35em;
-  font-family: 'General Sans', system-ui, sans-serif;
+  padding-left: 0.22em;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-align: center;
+}
+
+.title span {
+  letter-spacing: 0.30em;
+}
+
+/* rem — visible at this small font; em gap was ~1–2px per 0.1em tweak */
+.titleBy {
+  margin-inline-start: 0.75rem;
 }
 
 .icons {
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-  gap: clamp(1.15rem, 4vw, 2rem);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  width: min(100%, 720px);
+  margin: 0 auto;
+  column-gap: clamp(1rem, 3vw, 2rem);
 }
 
-/* -----------------------------------------
-   SHAPE CLASSES (Base geometry & physics)
-   ----------------------------------------- */
+.logoSlot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
 
-.circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  cursor: pointer;
+/* Shared row height — every logo vertically centered on the same line */
+.logoMark {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: clamp(58px, 9.5vw, 74px);
+}
+
+.logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  pointer-events: none;
   transition:
     transform 0.38s cubic-bezier(0.34, 1.45, 0.48, 1),
-    color 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.38s ease,
-    filter 0.3s ease;
+    filter 0.38s ease;
 }
 
-.rectangle {
-  height: 48px;
-  padding: 0 24px;
-  /* Room to breathe for wider rectangles */
-  border-radius: 12px;
-  /* Smooth corners */
-  flex-shrink: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tooltip {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 50%;
+  z-index: 20;
+  width: max-content;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: clamp(0.65rem, 1.35vw, 0.78rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+  color: rgba(240, 248, 241, 0.62);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-4px);
   transition:
-    transform 0.38s cubic-bezier(0.34, 1.45, 0.48, 1),
-    color 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.38s ease,
-    filter 0.3s ease;
+    opacity 0.22s ease,
+    visibility 0.22s ease,
+    transform 0.22s ease,
+    color 0.2s ease;
 }
 
-/* Hover scales for the different shapes */
-.circle:hover {
-  transform: translateY(-4px) scale(1.08);
-  filter: brightness(1.2);
+@media (hover: hover) {
+  .logoSlot:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    color: rgba(240, 248, 241, 0.92);
+  }
 }
 
-.circle:active {
-  transform: translateY(-1px) scale(1.03);
-  filter: brightness(1.05);
+.slot1 .logo {
+  max-height: clamp(26px, 3.8vw, 34px);
 }
 
-.rectangle:hover {
-  transform: translateY(-4px) scale(1.05);
-  filter: brightness(1.2);
+.slot2 .logo {
+  max-height: clamp(58px, 9.5vw, 74px);
 }
 
-.rectangle:active {
-  transform: translateY(-1px) scale(1.02);
-  filter: brightness(1.05);
+.slot3 .logo {
+  max-height: clamp(56px, 9.5vw, 72px);
+  max-width: clamp(50px, 9vw, 64px);
 }
 
-
-/* =========================================
-   ALTERNATING BUTTON COLORS (WHITE & BLACK)
-   ========================================= */
-
-/* ODD BUTTONS (1st and 3rd) -> WHITE THEME */
-.icons>div:nth-child(odd) {
-  /* Bright white gradient */
-  background: radial-gradient(circle at 28% 22%, #ffffff 0%, #f4f4f4 52%, #e5e5e5 100%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  color: #000000;
-
-  /* Lighter shadows so it doesn't look muddy */
-  box-shadow:
-    inset 0 3px 10px rgba(0, 0, 0, 0.03),
-    inset 2px 2px 6px rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
-    0 3px 10px rgba(0, 0, 0, 0.06);
+.slot4 .logo {
+  max-height: clamp(50px, 8.5vw, 64px);
 }
 
-/* ODD BUTTONS HOVER STATE */
-.icons>div:nth-child(odd):hover {
-  border-color: rgba(0, 0, 0, 0.15);
-  box-shadow:
-    inset 0 3px 12px rgba(0, 0, 0, 0.02),
-    inset 2px 2px 8px rgba(255, 255, 255, 1),
-    0 10px 28px rgba(0, 0, 0, 0.12),
-    0 4px 28px rgba(80, 210, 145, 0.22),
-    /* Green glow */
-    0 0 36px rgba(60, 190, 125, 0.14);
-  /* Green glow */
+@media (hover: hover) {
+  .logoSlot:hover .logo {
+    transform: translateY(-4px) scale(1.05);
+    filter:
+      brightness(1.15)
+      drop-shadow(0 0 12px rgba(255, 255, 255, 0.55))
+      drop-shadow(0 0 28px rgba(255, 255, 255, 0.28))
+      drop-shadow(0 4px 18px rgba(255, 255, 255, 0.18));
+  }
 }
 
-/* EVEN BUTTONS (2nd and 4th) -> PURE BLACK THEME */
-.icons>div:nth-child(even) {
-  /* Pitch black gradient */
-  background: radial-gradient(circle at 28% 22%, #1a1a1a 0%, #080808 52%, #000000 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-
-  /* Deep shadows for the black buttons */
-  box-shadow:
-    inset 0 3px 10px rgba(0, 0, 0, 0.9),
-    inset 2px 2px 6px rgba(0, 0, 0, 0.7),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
-    0 3px 10px rgba(0, 0, 0, 0.6);
-}
-
-/* EVEN BUTTONS HOVER STATE */
-.icons>div:nth-child(even):hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow:
-    inset 0 3px 12px rgba(0, 0, 0, 0.8),
-    inset 2px 2px 8px rgba(0, 0, 0, 0.6),
-    0 10px 28px rgba(0, 0, 0, 0.8),
-    0 4px 28px rgba(80, 210, 145, 0.22),
-    /* Green glow */
-    0 0 36px rgba(60, 190, 125, 0.14);
-  /* Green glow */
-}
-
-/* -----------------------------------------
-   RESPONSIVE DESIGN
-   ----------------------------------------- */
 @media (max-width: 480px) {
   .surface {
     padding-left: 0.35rem;
@@ -219,5 +198,14 @@
     padding-left: 1.25rem;
     padding-right: 1.25rem;
     border-radius: 12px;
+  }
+
+  .icons {
+    width: 100%;
+    column-gap: clamp(0.5rem, 2.5vw, 0.85rem);
+  }
+
+  .logoMark {
+    height: clamp(48px, 12vw, 60px);
   }
 }
