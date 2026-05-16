@@ -161,7 +161,7 @@
 }
 
 .slot1 .logo {
-  max-height: clamp(26px, 3.8vw, 34px);
+  max-height: clamp(20px, 2.9vw, 26px);
 }
 
 .slot2 .logo {
