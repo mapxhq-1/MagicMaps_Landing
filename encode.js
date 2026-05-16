@@ -21,7 +21,9 @@ const encodeVideo = (inputName, outputName) => {
         '-g 6',
         '-keyint_min 6',
         '-sc_threshold 0',
-        '-vf scale=1280:-1',
+        '-vf scale=1600:-1',
+        '-r 30',
+        '-vsync cfr',
         '-an'
       ])
       .on('end', () => {
