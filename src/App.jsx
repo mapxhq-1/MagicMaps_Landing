@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroHeader from './components/HeroHeader/HeroHeader';
@@ -14,12 +14,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const quoteSectionRef = useRef(null);
-
-  useEffect(() => {
-    // Normalize scroll behavior on touch devices to ensure GSAP ScrollTrigger 
-    // fires smoothly and video scrubs synchronously during touch drags.
-    ScrollTrigger.normalizeScroll(true);
-  }, []);
 
   return (
     <>

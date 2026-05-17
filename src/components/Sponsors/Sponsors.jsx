@@ -73,7 +73,7 @@ function SponsorLogo({ logo }) {
 export default function Sponsors() {
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
-      <StarrySky showMountains={false} />
+      <StarrySky showMountains={true} />
       <div className={styles.surface}>
         <div className={styles.container}>
           <p className={styles.title}>

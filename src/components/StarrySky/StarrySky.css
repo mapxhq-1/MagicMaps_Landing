@@ -48,3 +48,12 @@
   display: block;
   z-index: 1;
 }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.twinkle-1 { animation: twinkle 3s ease-in-out infinite; }
+.twinkle-2 { animation: twinkle 4s ease-in-out infinite 1s; }
+.twinkle-3 { animation: twinkle 5s ease-in-out infinite 2s; }
