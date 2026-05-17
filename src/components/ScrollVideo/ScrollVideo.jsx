@@ -61,36 +61,38 @@ export default function ScrollVideo({ videoSrc }) {
     const video = videoRef.current;
     if (isNaN(video.duration) || video.duration === 0) return;
 
-    // Mobile browser video decoders (especially iOS) freeze if currentTime is updated too rapidly (e.g. 120 times a second on modern phones).
-    // We use a proxy object to tween the time, and only push updates to the video element if the change is significant enough (~30fps).
-    const proxy = { time: 0 };
+    let frameId = null;
+    let targetProgress = 0;
 
-    let tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-        onUpdate: () => {
-          if (videoRef.current && !videoRef.current.paused) {
-            videoRef.current.pause();
-          }
+    const render = () => {
+      if (videoRef.current && !isNaN(videoRef.current.duration)) {
+        // Ensure video stays paused during scrub
+        if (!videoRef.current.paused) {
+          videoRef.current.pause();
+        }
+        videoRef.current.currentTime = targetProgress * videoRef.current.duration;
+      }
+      frameId = null;
+    };
+
+    ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true,
+      onUpdate: (self) => {
+        targetProgress = self.progress;
+        if (!frameId) {
+          frameId = requestAnimationFrame(render);
         }
       }
     });
 
-    tl.to(proxy, {
-      time: video.duration,
-      ease: 'none',
-      onUpdate: () => {
-        if (!videoRef.current) return;
-        // Only update the actual video if the time difference is greater than ~1 frame at 30fps
-        if (Math.abs(videoRef.current.currentTime - proxy.time) > 0.033) {
-          videoRef.current.currentTime = proxy.time;
-        }
+    return () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
       }
-    });
-
+    };
   }, [isLoaded], { scope: containerRef });
 
   return (
