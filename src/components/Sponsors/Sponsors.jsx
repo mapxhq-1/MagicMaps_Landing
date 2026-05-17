@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './Sponsors.module.css';
+import PixelSnow from '../PixelSnow';
 
 const logos = [
   {
@@ -25,14 +26,46 @@ const logos = [
 ];
 
 function SponsorLogo({ logo }) {
+  // 1. State to track if hovered and the current mouse coordinates
+  const [isHovering, setIsHovering] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // 2. Update coordinates on mouse move
+  const handleMouseMove = (e) => {
+    setMousePos({
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
   return (
-    <div className={`${styles.logoSlot} ${styles[logo.slot]}`} aria-label={logo.label}>
+    <div
+      className={`${styles.logoSlot} ${styles[logo.slot]}`}
+      aria-label={logo.label}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onMouseMove={handleMouseMove}
+    >
       <div className={styles.logoMark}>
         <img src={logo.src} alt="" className={styles.logo} />
       </div>
-      <p className={styles.tooltip} aria-hidden="true">
-        {logo.label}
-      </p>
+
+      {/* 3. Conditionally render the tooltip with inline styles for positioning */}
+      {isHovering && (
+        <p
+          className={styles.tooltip}
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            left: `${mousePos.x + 15}px`, // Added 15px offset so the cursor doesn't cover the text
+            top: `${mousePos.y + 15}px`,
+            pointerEvents: 'none', // Crucial: stops the tooltip from causing mouseLeave events
+            zIndex: 9999, // Ensures it floats above other elements
+          }}
+        >
+          {logo.label}
+        </p>
+      )}
     </div>
   );
 }
@@ -40,6 +73,17 @@ function SponsorLogo({ logo }) {
 export default function Sponsors() {
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <PixelSnow 
+          color="#ffffff"
+          flakeSize={0.002}
+          minFlakeSize={0.4}
+          pixelResolution={150}
+          speed={0.5}
+          density={0.04}
+          brightness={0.15}
+        />
+      </div>
       <div className={styles.surface}>
         <div className={styles.container}>
           <p className={styles.title}>

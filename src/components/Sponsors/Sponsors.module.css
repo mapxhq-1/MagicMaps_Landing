@@ -91,14 +91,14 @@
   column-gap: clamp(1rem, 3vw, 2rem);
 }
 
-.logoSlot {
+/* .logoSlot {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-}
+} */
 
 /* Shared row height — every logo vertically centered on the same line */
 .logoMark {
@@ -124,31 +124,57 @@
 }
 
 .tooltip {
-  position: absolute;
-  top: calc(100% + 0.3rem);
-  left: 50%;
-  z-index: 20;
-  width: max-content;
-  max-width: none;
+  /* 1. Typography & Spacing */
   margin: 0;
-  padding: 0;
-  font-family: var(--sans);
-  font-size: clamp(0.65rem, 1.35vw, 0.78rem);
-  font-weight: 400;
+  padding: 10px 16px;
+  font-family: var(--sans, system-ui, sans-serif);
+  font-size: 0.85rem;
+  font-weight: 500;
   letter-spacing: 0.02em;
-  line-height: 1.45;
-  color: rgba(240, 248, 241, 0.62);
-  text-align: center;
-  white-space: nowrap;
+  color: #f3f4f6;
+  /* Soft white */
+  line-height: 1.4;
+
+  /* 2. Layout (Handles long text gracefully) */
+  /* max-width: 250px; */
+  /* Prevents it from stretching across the whole screen */
+  text-align: left;
+  white-space: normal;
+  /* Allows text to wrap */
+
+  /* 3. The "Premium" Look (Glassmorphism & Borders) */
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+
+  /* 4. Depth (Layered shadows) */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  /* Subtle inner glow */
+
+  /* 5. Crucial Functional Rules */
   pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(-50%) translateY(-4px);
-  transition:
-    opacity 0.22s ease,
-    visibility 0.22s ease,
-    transform 0.22s ease,
-    color 0.2s ease;
+  z-index: 9999;
+
+  /* 6. A very quick CSS-only fade so it doesn't just snap into existence */
+  animation: tooltipPop 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Keyframes for the snappy appearance */
+@keyframes tooltipPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @media (hover: hover) {
@@ -181,10 +207,7 @@
   .logoSlot:hover .logo {
     transform: translateY(-4px) scale(1.05);
     filter:
-      brightness(1.15)
-      drop-shadow(0 0 12px rgba(255, 255, 255, 0.55))
-      drop-shadow(0 0 28px rgba(255, 255, 255, 0.28))
-      drop-shadow(0 4px 18px rgba(255, 255, 255, 0.18));
+      brightness(1.15) drop-shadow(0 0 12px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 28px rgba(255, 255, 255, 0.28)) drop-shadow(0 4px 18px rgba(255, 255, 255, 0.18));
   }
 }
 
