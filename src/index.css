@@ -59,6 +59,31 @@ body {
   font-family: var(--sans);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  
+  /* Custom Cursor - Tactical Navigation Arrow */
+  cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 4 L24 10 L13 13 L10 24 L4 4 Z' stroke='white' stroke-width='2' stroke-linejoin='round' stroke-linecap='round' fill='rgba(255, 255, 255, 0.1)'/%3E%3C/svg%3E") 4 4, auto;
+}
+
+a, 
+button, 
+[role="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+.cursor-pointer,
+select {
+  cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 4 L24 10 L13 13 L10 24 L4 4 Z' stroke='%23a8e6b0' stroke-width='2' stroke-linejoin='round' stroke-linecap='round' fill='rgba(168, 230, 176, 0.2)'/%3E%3C/svg%3E") 4 4, pointer !important;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea {
+  cursor: text;
 }
 
 *::-webkit-scrollbar {

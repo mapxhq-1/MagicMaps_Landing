@@ -1,4 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroHeader from './components/HeroHeader/HeroHeader';
 import ScrollVideo from './components/ScrollVideo/ScrollVideo';
 import Sponsors from './components/Sponsors/Sponsors';
@@ -8,8 +10,16 @@ import vid1 from './assets/videos/vid1-kf.mp4';
 import vid2 from './assets/videos/vid2-kf.mp4';
 import './App.css';
 
+gsap.registerPlugin(ScrollTrigger);
+
 function App() {
   const quoteSectionRef = useRef(null);
+
+  useEffect(() => {
+    // Normalize scroll behavior on touch devices to ensure GSAP ScrollTrigger 
+    // fires smoothly and video scrubs synchronously during touch drags.
+    ScrollTrigger.normalizeScroll(true);
+  }, []);
 
   return (
     <>
