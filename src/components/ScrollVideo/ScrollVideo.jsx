@@ -68,6 +68,11 @@ export default function ScrollVideo({ videoSrc }) {
         start: 'top top',
         end: 'bottom bottom',
         scrub: 0.1, // lowered scrub for better mobile responsiveness
+        onUpdate: () => {
+          if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+          }
+        }
       }
     });
 
@@ -84,7 +89,6 @@ export default function ScrollVideo({ videoSrc }) {
           className={styles.video}
           playsInline
           muted
-          autoPlay
           preload="auto"
           style={{ opacity: isLoaded ? 1 : 0 }}
         ></video>
