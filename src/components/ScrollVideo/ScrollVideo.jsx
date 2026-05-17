@@ -67,7 +67,7 @@ export default function ScrollVideo({ videoSrc }) {
         trigger: containerRef.current,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.1, // lowered scrub for better mobile responsiveness
+        scrub: true, // changed from 0.1 to true to fix mobile lag
         onUpdate: () => {
           if (videoRef.current && !videoRef.current.paused) {
             videoRef.current.pause();
