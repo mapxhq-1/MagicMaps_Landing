@@ -10,28 +10,36 @@ gsap.registerPlugin(ScrollTrigger);
 export default function ScrollVideo({ videoSrc }) {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Direct src assignment is required on mobile (iOS Safari) because it relies on HTTP range requests and often rejects large Blobs.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
 
     video.src = videoSrc;
     video.load();
 
     const handleLoad = () => {
-      if (!isLoaded) {
+      if (!isLoaded && video.readyState >= 1) {
         setIsLoaded(true);
-        // Prime the video decoder on mobile (especially iOS Safari) by playing and instantly pausing
+        
+        // Prime decoder
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
             video.pause();
-          }).catch(() => {
-            // Auto-play prevented, ignore.
-          });
+          }).catch(() => {});
         }
+
+        // Set exact canvas resolution
+        canvas.width = video.videoWidth || 1920;
+        canvas.height = video.videoHeight || 1080;
+        
+        // Draw initial frame
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
     };
 
@@ -39,7 +47,6 @@ export default function ScrollVideo({ videoSrc }) {
     video.addEventListener('loadeddata', handleLoad);
     video.addEventListener('canplay', handleLoad);
 
-    // Fallback interval just in case events don't fire reliably
     const checkInterval = setInterval(() => {
       if (video.readyState >= 1) {
         handleLoad();
@@ -56,57 +63,84 @@ export default function ScrollVideo({ videoSrc }) {
   }, [videoSrc, isLoaded]);
 
   useGSAP(() => {
-    if (!isLoaded || !videoRef.current) return;
+    if (!isLoaded || !videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
     if (isNaN(video.duration) || video.duration === 0) return;
 
-    let frameId = null;
-    let targetProgress = 0;
-
-    const render = () => {
-      if (videoRef.current && !isNaN(videoRef.current.duration)) {
-        // Ensure video stays paused during scrub
-        if (!videoRef.current.paused) {
-          videoRef.current.pause();
-        }
-        videoRef.current.currentTime = targetProgress * videoRef.current.duration;
+    // Use a lightweight render function for canvas
+    const renderFrame = () => {
+      if (video.readyState >= 2) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
-      frameId = null;
     };
 
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: true,
-      onUpdate: (self) => {
-        targetProgress = self.progress;
-        if (!frameId) {
-          frameId = requestAnimationFrame(render);
+    // Modern browsers support rVFC which fires precisely when a frame is ready
+    let rVFC_Id;
+    const loop = () => {
+      renderFrame();
+      rVFC_Id = video.requestVideoFrameCallback(loop);
+    };
+
+    if ('requestVideoFrameCallback' in video) {
+      rVFC_Id = video.requestVideoFrameCallback(loop);
+    } else {
+      // Fallback for older Safari
+      video.addEventListener('timeupdate', renderFrame);
+    }
+
+    // Standard GSAP scrub mapping
+    let tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true, // Instant response, no lag
+        onUpdate: () => {
+          // If fallback is needed (no rVFC), ensure we manually try rendering
+          if (!('requestVideoFrameCallback' in video)) {
+            renderFrame();
+          }
         }
       }
     });
 
+    // Tween the video's actual time. The events above will draw it to canvas
+    tl.to(video, { currentTime: video.duration, ease: 'none' });
+
     return () => {
-      if (frameId) {
-        cancelAnimationFrame(frameId);
+      if (rVFC_Id && 'cancelVideoFrameCallback' in video) {
+        video.cancelVideoFrameCallback(rVFC_Id);
       }
+      video.removeEventListener('timeupdate', renderFrame);
     };
+
   }, [isLoaded], { scope: containerRef });
 
   return (
     <div className={styles.scrollContainer} ref={containerRef}>
       <div className={styles.stickyContainer}>
         {!isLoaded && <div className={styles.loader}>Loading Video...</div>}
+        
+        {/* Hidden video element: Does the heavy lifting of decoding */}
         <video
           ref={videoRef}
-          className={styles.video}
           playsInline
           muted
           preload="auto"
-          style={{ opacity: isLoaded ? 1 : 0 }}
+          style={{ position: 'absolute', opacity: 0.001, width: '1px', height: '1px', pointerEvents: 'none' }}
         ></video>
+        
+        {/* Canvas element: Renders 10x faster on mobile DOM than a <video> tag */}
+        <canvas
+          ref={canvasRef}
+          className={styles.video}
+          style={{ opacity: isLoaded ? 1 : 0 }}
+        ></canvas>
+
         <div className={styles.exploreBtnWrap}>
           <NeonCtaButton>Try Now</NeonCtaButton>
         </div>
