@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Sponsors.module.css';
-import PixelSnow from '../PixelSnow';
+import StarrySky from '../StarrySky/StarrySky';
 
 const logos = [
   {
@@ -73,17 +73,7 @@ function SponsorLogo({ logo }) {
 export default function Sponsors() {
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <PixelSnow 
-          color="#ffffff"
-          flakeSize={0.002}
-          minFlakeSize={0.4}
-          pixelResolution={150}
-          speed={0.5}
-          density={0.04}
-          brightness={0.15}
-        />
-      </div>
+      <StarrySky showMountains={false} />
       <div className={styles.surface}>
         <div className={styles.container}>
           <p className={styles.title}>

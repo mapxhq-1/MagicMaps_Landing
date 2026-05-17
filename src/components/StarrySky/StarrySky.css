@@ -1,0 +1,50 @@
+.starry-sky-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.starry-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #020202 0%, #050505 60%, #15151a 100%);
+}
+
+.stars-svg {
+  position: absolute;
+  inset: -100px;
+  width: calc(100% + 200px);
+  height: calc(100% + 200px);
+  will-change: transform;
+}
+
+.mountains-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 35vh; /* Responsive height based on viewport */
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.horizon-glow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, rgba(40, 40, 50, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}
+
+.mountain-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}

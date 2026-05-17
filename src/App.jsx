@@ -3,7 +3,6 @@ import HeroHeader from './components/HeroHeader/HeroHeader';
 import ScrollVideo from './components/ScrollVideo/ScrollVideo';
 import Sponsors from './components/Sponsors/Sponsors';
 import ScrollReveal from './components/ReactBits/ScrollReveal';
-import NeonCtaButton from './components/NeonCtaButton/NeonCtaButton';
 import Footer from './components/Footer/Footer';
 import vid1 from './assets/videos/vid1-kf.mp4';
 import vid2 from './assets/videos/vid2-kf.mp4';
@@ -36,10 +35,6 @@ function App() {
             {`For the Curious, For the Changemakers, and for Those Who Question Everything!\n— Magic Maps`}
           </ScrollReveal>
         </div>
-      </section>
-
-      <section className="pre-footer-cta" aria-label="Try Magic Maps">
-        <NeonCtaButton>Try Now</NeonCtaButton>
       </section>
 
       <Footer />
