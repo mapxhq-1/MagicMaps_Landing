@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
+import NeonCtaButton from '../NeonCtaButton/NeonCtaButton'; // Adjust path if needed
 import styles from './ScrollVideo.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,6 +12,53 @@ export default function ScrollVideo({ videoSrc }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    video.src = videoSrc;
+    video.load();
+
+    const handleLoad = () => {
+      if (!isLoaded && video.readyState >= 1) {
+        setIsLoaded(true);
+
+        // Prime the decoder
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            video.pause();
+          }).catch(() => { });
+        }
+
+        canvas.width = video.videoWidth || 1920;
+        canvas.height = video.videoHeight || 1080;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+    };
+
+    video.addEventListener('loadedmetadata', handleLoad);
+    video.addEventListener('loadeddata', handleLoad);
+    video.addEventListener('canplay', handleLoad);
+
+    const checkInterval = setInterval(() => {
+      if (video.readyState >= 1) {
+        handleLoad();
+        clearInterval(checkInterval);
+      }
+    }, 250);
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoad);
+      video.removeEventListener('loadeddata', handleLoad);
+      video.removeEventListener('canplay', handleLoad);
+      clearInterval(checkInterval);
+    };
+  }, [videoSrc, isLoaded]);
 
   useGSAP(() => {
     if (!isLoaded || !videoRef.current || !canvasRef.current) return;
@@ -24,24 +71,19 @@ export default function ScrollVideo({ videoSrc }) {
 
     let animationFrameId;
     let targetTime = 0;
-    let isSeeking = false; // The crucial lock
+    let isSeeking = false;
 
-    // 1. Listen for when the video actually finishes seeking
     const handleSeeked = () => {
       isSeeking = false;
     };
     video.addEventListener('seeked', handleSeeked);
 
-    // 2. The Render Loop
     const renderLoop = () => {
-      // Only request a new frame if the video isn't currently busy processing one
-      // and if the user has scrolled far enough to warrant a visual update.
       if (!isSeeking && Math.abs(video.currentTime - targetTime) > 0.03) {
         isSeeking = true;
         video.currentTime = targetTime;
       }
 
-      // Always keep drawing whatever frame the video currently has
       if (video.readyState >= 2) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
@@ -51,7 +93,6 @@ export default function ScrollVideo({ videoSrc }) {
 
     renderLoop();
 
-    // 3. GSAP simply updates the target time, it doesn't force the video to seek
     ScrollTrigger.create({
       trigger: containerRef.current,
       start: 'top top',
@@ -59,7 +100,6 @@ export default function ScrollVideo({ videoSrc }) {
       scrub: 0.1,
       onUpdate: (self) => {
         if (video && !isNaN(video.duration)) {
-          // We just log where the user IS, the rAF loop handles getting the video there
           targetTime = self.progress * video.duration;
         }
       }
@@ -73,68 +113,16 @@ export default function ScrollVideo({ videoSrc }) {
 
   }, [isLoaded], { scope: containerRef });
 
-  // 2. GSAP and Canvas Render Loop
-  useGSAP(() => {
-    if (!isLoaded || !videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    if (isNaN(video.duration) || video.duration === 0) return;
-
-    let animationFrameId;
-
-    // Continuously draw to canvas via rAF. 
-    // This forces mobile browsers to paint the frame even when the video is paused.
-    const renderLoop = () => {
-      if (video.readyState >= 2) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      }
-      animationFrameId = requestAnimationFrame(renderLoop);
-    };
-
-    // Start the loop
-    renderLoop();
-
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      // Instead of manual JS throttling, use a slight GSAP scrub smoothing.
-      // scrub: 0.1 acts as a micro-buffer, preventing 120Hz mobile screens 
-      // from overwhelming the hardware video decoder with seek requests.
-      scrub: 0.1,
-      onUpdate: (self) => {
-        if (video && !isNaN(video.duration)) {
-          video.currentTime = self.progress * video.duration;
-        }
-      }
-    });
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      ScrollTrigger.getAll().forEach(t => t.kill());
-    };
-
-  }, [isLoaded], { scope: containerRef });
-
   return (
     <div className={styles.scrollContainer} ref={containerRef}>
       <div className={styles.stickyContainer}>
         {!isLoaded && <div className={styles.loader}>Loading Video...</div>}
 
-        {/* 
-          Hidden video element: 
-          Instead of 1x1px, use `display: none`. Modern browsers keep decoding 
-          in memory when JS retains the reference, but this avoids iOS Safari's 
-          "invisible element" power-saving bugs on the DOM level.
-        */}
         <video
           ref={videoRef}
           playsInline
           muted
-          autoPlay // Ensures iOS policies are satisfied immediately
+          autoPlay
           preload="auto"
           style={{ display: 'none' }}
         ></video>

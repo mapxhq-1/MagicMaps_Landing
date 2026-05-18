@@ -1,52 +1,35 @@
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
 import path from 'path';
+import fs from 'fs'; // Added to create directories
 
 ffmpeg.setFfmpegPath(ffmpegStatic);
 
+// 1. Desktop Video Encoder
 const encodeVideo = (inputName, outputName, options) => {
   return new Promise((resolve, reject) => {
     const inputPath = path.join(process.cwd(), 'src/assets/videos', inputName);
     const outputPath = path.join(process.cwd(), 'src/assets/videos', outputName);
 
-    // Extract options with sensible defaults for desktop
-    const {
-      videoFilter,
-      fps = 30,
-      crf = 28,
-      isMobile = false
-    } = options;
+    const { videoFilter, fps = 30, crf = 28 } = options;
 
-    console.log(`Starting encoding for ${outputName} at ${fps}fps, CRF ${crf}...`);
-
-    let outputOptions = [
-      '-c:v libx264',
-      '-preset slow',
-      `-crf ${crf}`,
-      '-pix_fmt yuv420p',
-      '-movflags +faststart',
-
-      // Keyframe every frame (Necessary for scroll-scrubbing, but very heavy)
-      '-g 1',
-      '-keyint_min 1',
-      '-sc_threshold 0',
-
-      `-vf ${videoFilter}`,
-      `-r ${fps}`,
-      '-vsync cfr',
-      '-an' // Mute audio
-    ];
-
-    // Add mobile-specific constraints for easier hardware decoding
-    if (isMobile) {
-      outputOptions.push(
-        '-profile:v main',
-        '-level 3.1'
-      );
-    }
+    console.log(`Starting Desktop encoding for ${outputName} at ${fps}fps, CRF ${crf}...`);
 
     ffmpeg(inputPath)
-      .outputOptions(outputOptions)
+      .outputOptions([
+        '-c:v libx264',
+        '-preset slow',
+        `-crf ${crf}`,
+        '-pix_fmt yuv420p',
+        '-movflags +faststart',
+        '-g 1',
+        '-keyint_min 1',
+        '-sc_threshold 0',
+        `-vf ${videoFilter}`,
+        `-r ${fps}`,
+        '-vsync cfr',
+        '-an'
+      ])
       .on('end', () => {
         console.log(`Finished encoding ${outputName}`);
         resolve();
@@ -59,31 +42,68 @@ const encodeVideo = (inputName, outputName, options) => {
   });
 };
 
+const extractFrames = (inputName, outputFolderName, fps = 24) => {
+  return new Promise((resolve, reject) => {
+    const inputPath = path.resolve(process.cwd(), 'src/assets/videos', inputName);
+    const absoluteOutputDir = path.resolve(process.cwd(), 'public/frames', outputFolderName);
+
+    if (!fs.existsSync(absoluteOutputDir)) {
+      fs.mkdirSync(absoluteOutputDir, { recursive: true });
+    }
+
+    // Switched to .jpg
+    const outputPath = path.join(absoluteOutputDir, 'frame_%03d.jpg').replace(/\\/g, '/');
+
+    console.log(`Starting Mobile frame extraction for ${outputFolderName}...`);
+
+    ffmpeg(inputPath)
+      .outputOptions([
+        `-r ${fps}`,
+        '-vf crop=floor(ih*9/16/2)*2:ih,scale=480:-2',
+
+        // -q:v sets the JPG quality. 
+        // The scale is 1-31 (lower is better quality). 2 is excellent.
+        '-q:v 2',
+
+        '-f image2'
+      ])
+      .output(outputPath)
+      .on('start', (commandLine) => {
+        console.log('\n--- EXECUTING RAW FFMPEG COMMAND ---');
+        console.log(commandLine);
+        console.log('------------------------------------\n');
+      })
+      .on('end', () => {
+        console.log(`✅ Finished extracting frames for ${outputFolderName}`);
+        resolve();
+      })
+      .on('error', (err) => {
+        console.error(`❌ Error extracting frames for ${outputFolderName}:`, err);
+        reject(err);
+      })
+      .run();
+  });
+};
+
+// 3. Main Execution
 async function main() {
   try {
     // Desktop encodes (1600px wide, 30fps, CRF 28)
     const desktopOptions = {
       videoFilter: 'scale=1600:-2',
       fps: 30,
-      crf: 28,
-      isMobile: false
+      crf: 28
     };
-    await encodeVideo('vid1.mp4', 'vid1-kf.mp4', desktopOptions);
-    await encodeVideo('vid2.mp4', 'vid2-kf.mp4', desktopOptions);
+    // await encodeVideo('vid1.mp4', 'vid1-kf.mp4', desktopOptions);
+    // await encodeVideo('vid2.mp4', 'vid2-kf.mp4', desktopOptions);
 
-    // Mobile encodes (Cropped to center 9:16, scaled to 480px wide, 24fps, CRF 32)
-    const mobileOptions = {
-      videoFilter: "crop='floor(ih*9/16/2)*2':ih,scale=480:-2", // Lowered from 720 to 480
-      fps: 24, // Lowered from 30 to 24 for smoothness/size
-      crf: 32, // Increased compression (lower quality, much smaller size)
-      isMobile: true
-    };
-    await encodeVideo('vid1.mp4', 'vid1-mobile-kf.mp4', mobileOptions);
-    await encodeVideo('vid2.mp4', 'vid2-mobile-kf.mp4', mobileOptions);
+    // Mobile encodes (Extracting WebP images instead of making an MP4)
+    await extractFrames('vid1.mp4', 'vid1_mobile', 24);
+    await extractFrames('vid2.mp4', 'vid2_mobile', 24);
 
-    console.log('All encoding completed!');
+    console.log('All encoding and extraction completed!');
   } catch (error) {
-    console.error('Failed encoding videos.', error);
+    console.error('Failed processing media.', error);
   }
 }
 

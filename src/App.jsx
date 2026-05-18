@@ -3,13 +3,14 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroHeader from './components/HeroHeader/HeroHeader';
 import ScrollVideo from './components/ScrollVideo/ScrollVideo';
+import ScrollImageSequence from './components/ScrollVideo/ScrollImageSequence'; // <-- Import the new mobile component
 import Sponsors from './components/Sponsors/Sponsors';
 import ScrollReveal from './components/ReactBits/ScrollReveal';
 import Footer from './components/Footer/Footer';
+
+// Only import Desktop videos (Mobile images will be fetched from the public folder)
 import vid1 from './assets/videos/vid1-kf.mp4';
 import vid2 from './assets/videos/vid2-kf.mp4';
-import vid1Mobile from './assets/videos/vid1-mobile-kf.mp4';
-import vid2Mobile from './assets/videos/vid2-mobile-kf.mp4';
 import './App.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -29,9 +30,28 @@ function App() {
   return (
     <>
       <HeroHeader />
-      <ScrollVideo videoSrc={isMobile ? vid1Mobile : vid1} />
+
+      {/* Video 1 Section */}
+      {isMobile ? (
+        <ScrollImageSequence
+          frameCount={150} // Change this to the exact number of frames generated for vid1
+          framePath="/frames/vid1_mobile/frame_" // Ensure this points to your public folder
+        />
+      ) : (
+        <ScrollVideo videoSrc={vid1} />
+      )}
+
       <Sponsors />
-      <ScrollVideo videoSrc={isMobile ? vid2Mobile : vid2} />
+
+      {/* Video 2 Section */}
+      {isMobile ? (
+        <ScrollImageSequence
+          frameCount={150} // Change this to the exact number of frames generated for vid2
+          framePath="/frames/vid2_mobile/frame_"
+        />
+      ) : (
+        <ScrollVideo videoSrc={vid2} />
+      )}
 
       {/* Same scroll model as ScrollVideo: tall section + sticky inner; one GSAP scrub on section */}
       <section className="quote-section" ref={quoteSectionRef}>
