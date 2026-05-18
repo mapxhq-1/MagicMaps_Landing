@@ -13,53 +13,65 @@ export default function ScrollVideo({ videoSrc }) {
   const canvasRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 1. Initial Load and Decoder Priming
-  useEffect(() => {
+  useGSAP(() => {
+    if (!isLoaded || !videoRef.current || !canvasRef.current) return;
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    const ctx = canvas.getContext('2d');
 
-    video.src = videoSrc;
-    video.load();
+    if (isNaN(video.duration) || video.duration === 0) return;
 
-    const handleLoad = () => {
-      if (!isLoaded && video.readyState >= 1) {
-        setIsLoaded(true);
+    let animationFrameId;
+    let targetTime = 0;
+    let isSeeking = false; // The crucial lock
 
-        // Prime the decoder for mobile
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            video.pause();
-          }).catch(() => { });
-        }
+    // 1. Listen for when the video actually finishes seeking
+    const handleSeeked = () => {
+      isSeeking = false;
+    };
+    video.addEventListener('seeked', handleSeeked);
 
-        canvas.width = video.videoWidth || 1920;
-        canvas.height = video.videoHeight || 1080;
+    // 2. The Render Loop
+    const renderLoop = () => {
+      // Only request a new frame if the video isn't currently busy processing one
+      // and if the user has scrolled far enough to warrant a visual update.
+      if (!isSeeking && Math.abs(video.currentTime - targetTime) > 0.03) {
+        isSeeking = true;
+        video.currentTime = targetTime;
+      }
 
-        const ctx = canvas.getContext('2d');
+      // Always keep drawing whatever frame the video currently has
+      if (video.readyState >= 2) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
+
+      animationFrameId = requestAnimationFrame(renderLoop);
     };
 
-    video.addEventListener('loadedmetadata', handleLoad);
-    video.addEventListener('loadeddata', handleLoad);
-    video.addEventListener('canplay', handleLoad);
+    renderLoop();
 
-    const checkInterval = setInterval(() => {
-      if (video.readyState >= 1) {
-        handleLoad();
-        clearInterval(checkInterval);
+    // 3. GSAP simply updates the target time, it doesn't force the video to seek
+    ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.1,
+      onUpdate: (self) => {
+        if (video && !isNaN(video.duration)) {
+          // We just log where the user IS, the rAF loop handles getting the video there
+          targetTime = self.progress * video.duration;
+        }
       }
-    }, 250);
+    });
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleLoad);
-      video.removeEventListener('loadeddata', handleLoad);
-      video.removeEventListener('canplay', handleLoad);
-      clearInterval(checkInterval);
+      cancelAnimationFrame(animationFrameId);
+      video.removeEventListener('seeked', handleSeeked);
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
-  }, [videoSrc, isLoaded]);
+
+  }, [isLoaded], { scope: containerRef });
 
   // 2. GSAP and Canvas Render Loop
   useGSAP(() => {
