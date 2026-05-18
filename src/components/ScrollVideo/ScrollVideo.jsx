@@ -92,24 +92,32 @@ export default function ScrollVideo({ videoSrc }) {
       video.addEventListener('timeupdate', renderFrame);
     }
 
+    let lastSeekTime = 0;
+
     // Standard GSAP scrub mapping
-    let tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true, // Instant response, no lag
-        onUpdate: () => {
-          // If fallback is needed (no rVFC), ensure we manually try rendering
-          if (!('requestVideoFrameCallback' in video)) {
-            renderFrame();
+    ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true, // Instant response, no GSAP-induced lag
+      onUpdate: (self) => {
+        const now = Date.now();
+        
+        // Throttling: only ask the browser to seek the video a maximum of ~30 times a second (33ms).
+        // This prevents the mobile hardware decoder from completely freezing when bombarded by 120Hz touch events.
+        if (now - lastSeekTime > 33) {
+          if (video && !isNaN(video.duration)) {
+            video.currentTime = self.progress * video.duration;
           }
+          lastSeekTime = now;
+        }
+
+        // If fallback is needed (no rVFC), ensure we manually try rendering
+        if (!('requestVideoFrameCallback' in video)) {
+          renderFrame();
         }
       }
     });
-
-    // Tween the video's actual time. The events above will draw it to canvas
-    tl.to(video, { currentTime: video.duration, ease: 'none' });
 
     return () => {
       if (rVFC_Id && 'cancelVideoFrameCallback' in video) {
