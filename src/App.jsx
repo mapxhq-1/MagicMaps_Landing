@@ -34,7 +34,7 @@ function App() {
       {/* Video 1 Section */}
       {isMobile ? (
         <ScrollImageSequence
-          frameCount={150} // Change this to the exact number of frames generated for vid1
+          frameCount={600} // Change this to the exact number of frames generated for vid1
           framePath="/frames/vid1_mobile/frame_" // Ensure this points to your public folder
         />
       ) : (
@@ -46,7 +46,7 @@ function App() {
       {/* Video 2 Section */}
       {isMobile ? (
         <ScrollImageSequence
-          frameCount={150} // Change this to the exact number of frames generated for vid2
+          frameCount={561} // Change this to the exact number of frames generated for vid2
           framePath="/frames/vid2_mobile/frame_"
         />
       ) : (

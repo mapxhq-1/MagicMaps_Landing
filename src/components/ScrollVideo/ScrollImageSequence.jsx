@@ -20,7 +20,7 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
         for (let i = 1; i <= frameCount; i++) {
             const img = new Image();
             // Pad index to match FFmpeg output (e.g., 001, 002)
-            const paddedIndex = String(i).padStart(3, '0');
+            const paddedIndex = String(i).padStart(4, '0');
             img.src = `${framePath}${paddedIndex}.jpg`;
 
             img.onload = () => {

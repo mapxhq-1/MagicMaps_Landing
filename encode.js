@@ -42,7 +42,7 @@ const encodeVideo = (inputName, outputName, options) => {
   });
 };
 
-const extractFrames = (inputName, outputFolderName, fps = 24) => {
+const extractFrames = (inputName, outputFolderName, fps = 15) => {
   return new Promise((resolve, reject) => {
     const inputPath = path.resolve(process.cwd(), 'src/assets/videos', inputName);
     const absoluteOutputDir = path.resolve(process.cwd(), 'public/frames', outputFolderName);
@@ -51,8 +51,8 @@ const extractFrames = (inputName, outputFolderName, fps = 24) => {
       fs.mkdirSync(absoluteOutputDir, { recursive: true });
     }
 
-    // Switched to .jpg
-    const outputPath = path.join(absoluteOutputDir, 'frame_%03d.jpg').replace(/\\/g, '/');
+    // UPDATE HERE: Change %03d to %04d
+    const outputPath = path.join(absoluteOutputDir, 'frame_%04d.jpg').replace(/\\/g, '/');
 
     console.log(`Starting Mobile frame extraction for ${outputFolderName}...`);
 
@@ -60,11 +60,7 @@ const extractFrames = (inputName, outputFolderName, fps = 24) => {
       .outputOptions([
         `-r ${fps}`,
         '-vf crop=floor(ih*9/16/2)*2:ih,scale=480:-2',
-
-        // -q:v sets the JPG quality. 
-        // The scale is 1-31 (lower is better quality). 2 is excellent.
         '-q:v 2',
-
         '-f image2'
       ])
       .output(outputPath)
