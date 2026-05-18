@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroHeader from './components/HeroHeader/HeroHeader';
@@ -8,19 +8,30 @@ import ScrollReveal from './components/ReactBits/ScrollReveal';
 import Footer from './components/Footer/Footer';
 import vid1 from './assets/videos/vid1-kf.mp4';
 import vid2 from './assets/videos/vid2-kf.mp4';
+import vid1Mobile from './assets/videos/vid1-mobile-kf.mp4';
+import vid2Mobile from './assets/videos/vid2-mobile-kf.mp4';
 import './App.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const quoteSectionRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <>
       <HeroHeader />
-      <ScrollVideo videoSrc={vid1} />
+      <ScrollVideo videoSrc={isMobile ? vid1Mobile : vid1} />
       <Sponsors />
-      <ScrollVideo videoSrc={vid2} />
+      <ScrollVideo videoSrc={isMobile ? vid2Mobile : vid2} />
 
       {/* Same scroll model as ScrollVideo: tall section + sticky inner; one GSAP scrub on section */}
       <section className="quote-section" ref={quoteSectionRef}>
