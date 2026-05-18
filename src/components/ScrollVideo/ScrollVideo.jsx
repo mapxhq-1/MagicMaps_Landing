@@ -13,6 +13,7 @@ export default function ScrollVideo({ videoSrc }) {
   const canvasRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // 1. Initial Load and Decoder Priming
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -24,20 +25,18 @@ export default function ScrollVideo({ videoSrc }) {
     const handleLoad = () => {
       if (!isLoaded && video.readyState >= 1) {
         setIsLoaded(true);
-        
-        // Prime decoder
+
+        // Prime the decoder for mobile
         const playPromise = video.play();
         if (playPromise !== undefined) {
           playPromise.then(() => {
             video.pause();
-          }).catch(() => {});
+          }).catch(() => { });
         }
 
-        // Set exact canvas resolution
         canvas.width = video.videoWidth || 1920;
         canvas.height = video.videoHeight || 1080;
-        
-        // Draw initial frame
+
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
@@ -62,68 +61,48 @@ export default function ScrollVideo({ videoSrc }) {
     };
   }, [videoSrc, isLoaded]);
 
+  // 2. GSAP and Canvas Render Loop
   useGSAP(() => {
     if (!isLoaded || !videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     if (isNaN(video.duration) || video.duration === 0) return;
 
-    // Use a lightweight render function for canvas
-    const renderFrame = () => {
+    let animationFrameId;
+
+    // Continuously draw to canvas via rAF. 
+    // This forces mobile browsers to paint the frame even when the video is paused.
+    const renderLoop = () => {
       if (video.readyState >= 2) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
+      animationFrameId = requestAnimationFrame(renderLoop);
     };
 
-    // Modern browsers support rVFC which fires precisely when a frame is ready
-    let rVFC_Id;
-    const loop = () => {
-      renderFrame();
-      rVFC_Id = video.requestVideoFrameCallback(loop);
-    };
+    // Start the loop
+    renderLoop();
 
-    if ('requestVideoFrameCallback' in video) {
-      rVFC_Id = video.requestVideoFrameCallback(loop);
-    } else {
-      // Fallback for older Safari
-      video.addEventListener('timeupdate', renderFrame);
-    }
-
-    let lastSeekTime = 0;
-
-    // Standard GSAP scrub mapping
     ScrollTrigger.create({
       trigger: containerRef.current,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: true, // Instant response, no GSAP-induced lag
+      // Instead of manual JS throttling, use a slight GSAP scrub smoothing.
+      // scrub: 0.1 acts as a micro-buffer, preventing 120Hz mobile screens 
+      // from overwhelming the hardware video decoder with seek requests.
+      scrub: 0.1,
       onUpdate: (self) => {
-        const now = Date.now();
-        
-        // Throttling: only ask the browser to seek the video a maximum of ~30 times a second (33ms).
-        // This prevents the mobile hardware decoder from completely freezing when bombarded by 120Hz touch events.
-        if (now - lastSeekTime > 33) {
-          if (video && !isNaN(video.duration)) {
-            video.currentTime = self.progress * video.duration;
-          }
-          lastSeekTime = now;
-        }
-
-        // If fallback is needed (no rVFC), ensure we manually try rendering
-        if (!('requestVideoFrameCallback' in video)) {
-          renderFrame();
+        if (video && !isNaN(video.duration)) {
+          video.currentTime = self.progress * video.duration;
         }
       }
     });
 
     return () => {
-      if (rVFC_Id && 'cancelVideoFrameCallback' in video) {
-        video.cancelVideoFrameCallback(rVFC_Id);
-      }
-      video.removeEventListener('timeupdate', renderFrame);
+      cancelAnimationFrame(animationFrameId);
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
 
   }, [isLoaded], { scope: containerRef });
@@ -132,17 +111,22 @@ export default function ScrollVideo({ videoSrc }) {
     <div className={styles.scrollContainer} ref={containerRef}>
       <div className={styles.stickyContainer}>
         {!isLoaded && <div className={styles.loader}>Loading Video...</div>}
-        
-        {/* Hidden video element: Does the heavy lifting of decoding */}
+
+        {/* 
+          Hidden video element: 
+          Instead of 1x1px, use `display: none`. Modern browsers keep decoding 
+          in memory when JS retains the reference, but this avoids iOS Safari's 
+          "invisible element" power-saving bugs on the DOM level.
+        */}
         <video
           ref={videoRef}
           playsInline
           muted
+          autoPlay // Ensures iOS policies are satisfied immediately
           preload="auto"
-          style={{ position: 'absolute', opacity: 0.001, width: '1px', height: '1px', pointerEvents: 'none' }}
+          style={{ display: 'none' }}
         ></video>
-        
-        {/* Canvas element: Renders 10x faster on mobile DOM than a <video> tag */}
+
         <canvas
           ref={canvasRef}
           className={styles.video}
