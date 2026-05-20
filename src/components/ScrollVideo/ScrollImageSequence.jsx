@@ -88,11 +88,19 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
                     </div>
                 )}
 
+                
                 <canvas
-                    ref={canvasRef}
-                    className={styles.video}
-                    style={{ opacity: loadedImages >= frameCount ? 1 : 0 }}
-                ></canvas>
+          ref={canvasRef}
+          className={styles.video}
+          style={{ 
+            opacity: loadedImages >= frameCount ? 1 : 0,
+            
+            // Add these three lines to create the top/bottom spaces:
+            width: '100%', 
+            height: '100vh', 
+            objectFit: 'contain' 
+          }}
+        ></canvas>
 
                 <div className={styles.exploreBtnWrap}>
                     <NeonCtaButton>Try Now</NeonCtaButton>

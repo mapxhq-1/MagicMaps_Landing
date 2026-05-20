@@ -46,29 +46,26 @@ const extractFrames = (inputName, outputFolderName, fps = 15) => {
   return new Promise((resolve, reject) => {
     const inputPath = path.resolve(process.cwd(), 'src/assets/videos', inputName);
     const absoluteOutputDir = path.resolve(process.cwd(), 'public/frames', outputFolderName);
-
+    
     if (!fs.existsSync(absoluteOutputDir)) {
       fs.mkdirSync(absoluteOutputDir, { recursive: true });
     }
 
-    // UPDATE HERE: Change %03d to %04d
     const outputPath = path.join(absoluteOutputDir, 'frame_%04d.jpg').replace(/\\/g, '/');
 
     console.log(`Starting Mobile frame extraction for ${outputFolderName}...`);
 
     ffmpeg(inputPath)
       .outputOptions([
-        `-r ${fps}`,
-        '-vf crop=floor(ih*9/16/2)*2:ih,scale=480:-2',
-        '-q:v 2',
-        '-f image2'
+        `-r ${fps}`, 
+        
+        // NO MORE CROP! Just scale the 16:9 video to 720px wide.
+        '-vf scale=720:-2', 
+        
+        '-q:v 2', 
+        '-f image2' 
       ])
       .output(outputPath)
-      .on('start', (commandLine) => {
-        console.log('\n--- EXECUTING RAW FFMPEG COMMAND ---');
-        console.log(commandLine);
-        console.log('------------------------------------\n');
-      })
       .on('end', () => {
         console.log(`✅ Finished extracting frames for ${outputFolderName}`);
         resolve();
