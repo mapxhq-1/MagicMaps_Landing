@@ -1,7 +1,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import StarrySky from '../StarrySky/StarrySky';
 import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -161,27 +160,24 @@ const ScrollReveal = ({
   ]);
 
   return (
-    <>
-      <StarrySky showMountains={true} />
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-        <h2 ref={containerRef} style={{ margin: '2rem 0', perspective: '1000px' }} className={containerClassName}>
-          <p
-            style={{
-              fontSize: textSize,
-              lineHeight: textLineHeight,
-              fontWeight: textWeight,
-              fontFamily: BODY_FONT,
-            }}
-            className={textClassName}
-          >
-            {splitText}
-          </p>
-        </h2>
-        <div style={{ marginTop: '3rem' }}>
-          <NeonCtaButton>Try Now</NeonCtaButton>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 10 }}>
+      <h2 ref={containerRef} style={{ margin: '2rem 0', perspective: '1000px' }} className={containerClassName}>
+        <p
+          style={{
+            fontSize: textSize,
+            lineHeight: textLineHeight,
+            fontWeight: textWeight,
+            fontFamily: BODY_FONT,
+          }}
+          className={textClassName}
+        >
+          {splitText}
+        </p>
+      </h2>
+      <div style={{ marginTop: '3rem' }}>
+        <NeonCtaButton>Try Now</NeonCtaButton>
       </div>
-    </>
+    </div>
   );
 };
 

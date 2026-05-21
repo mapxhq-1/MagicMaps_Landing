@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styles from './Sponsors.module.css';
-import StarrySky from '../StarrySky/StarrySky';
 
 const logos = [
   {
@@ -26,11 +25,9 @@ const logos = [
 ];
 
 function SponsorLogo({ logo }) {
-  // 1. State to track if hovered and the current mouse coordinates
   const [isHovering, setIsHovering] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // 2. Update coordinates on mouse move
   const handleMouseMove = (e) => {
     setMousePos({
       x: e.clientX,
@@ -50,17 +47,16 @@ function SponsorLogo({ logo }) {
         <img src={logo.src} alt="" className={styles.logo} />
       </div>
 
-      {/* 3. Conditionally render the tooltip with inline styles for positioning */}
       {isHovering && (
         <p
           className={styles.tooltip}
           aria-hidden="true"
           style={{
             position: 'fixed',
-            left: `${mousePos.x + 15}px`, // Added 15px offset so the cursor doesn't cover the text
+            left: `${mousePos.x + 15}px`,
             top: `${mousePos.y + 15}px`,
-            pointerEvents: 'none', // Crucial: stops the tooltip from causing mouseLeave events
-            zIndex: 9999, // Ensures it floats above other elements
+            pointerEvents: 'none',
+            zIndex: 9999,
           }}
         >
           {logo.label}
@@ -73,7 +69,7 @@ function SponsorLogo({ logo }) {
 export default function Sponsors() {
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
-      <StarrySky showMountains={false} />
+      {/* StarrySky has been completely removed from here */}
       <div className={styles.surface}>
         <div className={styles.container}>
           <p className={styles.title}>

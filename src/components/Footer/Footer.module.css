@@ -3,6 +3,7 @@
   background: #000000;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1.25rem clamp(1rem, 4vw, 2rem) 1.75rem;
+  padding-top: 100px;
   box-sizing: border-box;
   position: relative;
   z-index: 10;

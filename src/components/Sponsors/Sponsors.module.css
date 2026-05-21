@@ -4,7 +4,7 @@
   z-index: 1;
   isolation: isolate;
   overflow: visible;
-  background: linear-gradient(180deg, #161616 0%, #121212 50%, #161616 100%);
+  background: transparent;
 }
 
 .wrapper::before,
