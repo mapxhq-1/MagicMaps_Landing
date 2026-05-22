@@ -6,6 +6,7 @@
   padding: 0.68rem 1.85rem;
   border-radius: 9999px;
   border: none;
+  outline: none;
 
   /* Refined neon — lush gradient, no transparency blur */
   background: linear-gradient(
@@ -26,13 +27,9 @@
   text-transform: none;
   text-shadow: 0 1px 2px rgba(0, 28, 14, 0.35);
 
-  /* Elevated, minimal: crisp rim + soft lift — luxury restraint */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 rgba(0, 50, 28, 0.18),
     0 4px 14px rgba(0, 0, 0, 0.22),
-    0 12px 28px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(0, 45, 24, 0.18);
+    0 12px 28px rgba(0, 0, 0, 0.12);
 
   transition:
     transform 0.35s cubic-bezier(0.33, 1, 0.68, 1),
@@ -44,16 +41,11 @@
   transform: translateY(-2px);
   filter: brightness(1.06);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1px 0 rgba(0, 50, 28, 0.14),
-    /* neon glow */
     0 0 20px rgba(62, 255, 140, 0.55),
     0 0 44px rgba(46, 235, 125, 0.38),
     0 0 72px rgba(28, 210, 110, 0.22),
-    /* lift */
     0 8px 22px rgba(0, 0, 0, 0.18),
     0 18px 36px rgba(0, 0, 0, 0.14),
-    0 0 0 1px rgba(0, 45, 24, 0.14),
     0 14px 42px rgba(24, 210, 115, 0.28);
 }
 
@@ -61,10 +53,7 @@
   transform: translateY(0);
   filter: brightness(0.98);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 2px 8px rgba(0, 40, 22, 0.22),
-    0 2px 8px rgba(0, 0, 0, 0.18),
-    0 0 0 1px rgba(0, 45, 24, 0.2);
+    0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .icon {

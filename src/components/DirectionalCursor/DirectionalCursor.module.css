@@ -1,0 +1,39 @@
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  z-index: 100000;
+  transform-origin: 4px 4px;
+  will-change: transform;
+}
+
+.cursor svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.arrow {
+  transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+.arrowDefault path {
+  stroke: white;
+  fill: rgba(255, 255, 255, 0.1);
+}
+
+.arrowInteractive path {
+  stroke: #a8e6b0;
+  fill: rgba(168, 230, 176, 0.2);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursor {
+    display: none;
+  }
+}

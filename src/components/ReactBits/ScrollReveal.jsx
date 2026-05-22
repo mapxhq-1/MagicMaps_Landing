@@ -1,8 +1,6 @@
 import { useEffect, useRef, useMemo } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
-
 gsap.registerPlugin(ScrollTrigger);
 
 const BODY_FONT = 'var(--quote-display)';
@@ -161,7 +159,7 @@ const ScrollReveal = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-      <h2 ref={containerRef} style={{ margin: '2rem 0', perspective: '1000px' }} className={containerClassName}>
+      <h2 ref={containerRef} style={{ margin: '2rem 0 0.5rem', perspective: '1000px' }} className={containerClassName}>
         <p
           style={{
             fontSize: textSize,
@@ -174,9 +172,6 @@ const ScrollReveal = ({
           {splitText}
         </p>
       </h2>
-      <div style={{ marginTop: '3rem' }}>
-        <NeonCtaButton>Try Now</NeonCtaButton>
-      </div>
     </div>
   );
 };

@@ -59,31 +59,32 @@ body {
   font-family: var(--sans);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-  
-  /* Custom Cursor - Tactical Navigation Arrow */
-  cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 4 L24 10 L13 13 L10 24 L4 4 Z' stroke='white' stroke-width='2' stroke-linejoin='round' stroke-linecap='round' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E") 4 4, auto;
 }
 
-a, 
-button, 
-[role="button"],
-input[type="submit"],
-input[type="reset"],
-input[type="button"],
-.cursor-pointer,
-select {
-  cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 4 L24 10 L13 13 L10 24 L4 4 Z' stroke='%23a8e6b0' stroke-width='2' stroke-linejoin='round' stroke-linecap='round' fill='rgba(168,230,176,0.2)'/%3E%3C/svg%3E") 4 4, pointer !important;
+/* Directional cursor (DirectionalCursor.jsx) — hide system pointer on fine pointers */
+html.directional-cursor-active,
+html.directional-cursor-active body,
+html.directional-cursor-active a,
+html.directional-cursor-active button,
+html.directional-cursor-active [role='button'],
+html.directional-cursor-active input[type='submit'],
+html.directional-cursor-active input[type='reset'],
+html.directional-cursor-active input[type='button'],
+html.directional-cursor-active .cursor-pointer,
+html.directional-cursor-active select,
+html.directional-cursor-active label[for] {
+  cursor: none !important;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-textarea {
-  cursor: text;
+html.directional-cursor-active input[type='text'],
+html.directional-cursor-active input[type='email'],
+html.directional-cursor-active input[type='password'],
+html.directional-cursor-active input[type='number'],
+html.directional-cursor-active input[type='search'],
+html.directional-cursor-active input[type='tel'],
+html.directional-cursor-active input[type='url'],
+html.directional-cursor-active textarea {
+  cursor: text !important;
 }
 
 *::-webkit-scrollbar {

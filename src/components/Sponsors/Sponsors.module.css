@@ -91,14 +91,15 @@
   column-gap: clamp(1rem, 3vw, 2rem);
 }
 
-/* .logoSlot {
+.logoSlot {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-} */
+  outline: none;
+}
 
 /* Shared row height — every logo vertically centered on the same line */
 .logoMark {
@@ -123,66 +124,45 @@
     filter 0.38s ease;
 }
 
-.tooltip {
-  /* 1. Typography & Spacing */
+.label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
   margin: 0;
-  padding: 10px 16px;
+  margin-top: 0.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
   font-family: var(--sans, system-ui, sans-serif);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: clamp(0.58rem, 1.05vw, 0.72rem);
+  font-weight: 400;
   letter-spacing: 0.02em;
-  color: #f3f4f6;
-  /* Soft white */
-  line-height: 1.4;
-
-  /* 2. Layout (Handles long text gracefully) */
-  /* max-width: 250px; */
-  /* Prevents it from stretching across the whole screen */
-  text-align: left;
-  white-space: normal;
-  /* Allows text to wrap */
-
-  /* 3. The "Premium" Look (Glassmorphism & Borders) */
-  background: rgba(20, 20, 20, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-
-  /* 4. Depth (Layered shadows) */
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.2),
-    0 10px 15px -3px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  /* Subtle inner glow */
-
-  /* 5. Crucial Functional Rules */
+  color: #ffffff;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
   pointer-events: none;
-  z-index: 9999;
-
-  /* 6. A very quick CSS-only fade so it doesn't just snap into existence */
-  animation: tooltipPop 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 20;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  transition: opacity 0.15s ease, visibility 0.15s;
 }
 
-/* Keyframes for the snappy appearance */
-@keyframes tooltipPop {
-  0% {
-    opacity: 0;
-    transform: scale(0.95) translateY(4px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@media (hover: hover) {
-  .logoSlot:hover .tooltip {
+/* Desktop / fine pointer: label only while cursor is over the icon */
+@media (hover: hover) and (pointer: fine) {
+  .logoSlot:hover .label {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(0);
-    color: rgba(240, 248, 241, 0.92);
+  }
+}
+
+/* Touch / no hover: label when icon is tapped (see .active in JSX) */
+@media (hover: none), (pointer: coarse) {
+  .logoSlot.active .label {
+    opacity: 1;
+    visibility: visible;
   }
 }
 

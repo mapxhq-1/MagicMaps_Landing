@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './Sponsors.module.css';
 
 const logos = [
@@ -24,52 +24,57 @@ const logos = [
   },
 ];
 
-function SponsorLogo({ logo }) {
-  const [isHovering, setIsHovering] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e) => {
-    setMousePos({
-      x: e.clientX,
-      y: e.clientY
-    });
+function SponsorLogo({ logo, isTouch, isActive, onToggle }) {
+  const handleClick = (e) => {
+    if (!isTouch) return;
+    e.stopPropagation();
+    onToggle(logo.src);
   };
 
   return (
     <div
-      className={`${styles.logoSlot} ${styles[logo.slot]}`}
+      className={`${styles.logoSlot} ${styles[logo.slot]}${isActive ? ` ${styles.active}` : ''}`}
+      role="group"
       aria-label={logo.label}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={handleMouseMove}
+      onClick={handleClick}
     >
       <div className={styles.logoMark}>
         <img src={logo.src} alt="" className={styles.logo} />
       </div>
 
-      {isHovering && (
-        <p
-          className={styles.tooltip}
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            left: `${mousePos.x + 15}px`,
-            top: `${mousePos.y + 15}px`,
-            pointerEvents: 'none',
-            zIndex: 9999,
-          }}
-        >
-          {logo.label}
-        </p>
-      )}
+      <span className={styles.label} role="tooltip">
+        {logo.label}
+      </span>
     </div>
   );
 }
 
 export default function Sponsors() {
+  const [activeKey, setActiveKey] = useState(null);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: none), (pointer: coarse)');
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (!isTouch || activeKey === null) return;
+
+    const close = () => setActiveKey(null);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [isTouch, activeKey]);
+
+  const handleToggle = (key) => {
+    setActiveKey((prev) => (prev === key ? null : key));
+  };
+
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
-      {/* StarrySky has been completely removed from here */}
       <div className={styles.surface}>
         <div className={styles.container}>
           <p className={styles.title}>
@@ -78,7 +83,13 @@ export default function Sponsors() {
           </p>
           <div className={styles.icons}>
             {logos.map((logo) => (
-              <SponsorLogo key={logo.src} logo={logo} />
+              <SponsorLogo
+                key={logo.src}
+                logo={logo}
+                isTouch={isTouch}
+                isActive={activeKey === logo.src}
+                onToggle={handleToggle}
+              />
             ))}
           </div>
         </div>

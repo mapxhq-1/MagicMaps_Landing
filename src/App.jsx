@@ -9,6 +9,8 @@ import ScrollImageSequence from './components/ScrollVideo/ScrollImageSequence';
 import Sponsors from './components/Sponsors/Sponsors';
 import ScrollReveal from './components/ReactBits/ScrollReveal';
 import Footer from './components/Footer/Footer';
+import NeonCtaButton from './components/NeonCtaButton/NeonCtaButton';
+import DirectionalCursor from './components/DirectionalCursor/DirectionalCursor';
 
 // New React Bits Components
 import DotGrid from './components/ReactBits/DotGrid'; // Adjust path as needed
@@ -35,6 +37,7 @@ function App() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
+      <DirectionalCursor />
       
       <div 
   style={{
@@ -98,30 +101,27 @@ function App() {
           </div>
         </section>
 
-        {/* THREADS SEPARATOR */}
-       {/* SPACER: Keeps it away from the quote section */}
-        <div style={{ height: '100px', width: '100%', pointerEvents: 'none' }} />
+        <div className="footer-transition">
+          <div className="footer-divider-sticky">
+            <div className="pre-footer-cta">
+              <NeonCtaButton>Try Now</NeonCtaButton>
+            </div>
 
-        {/* THREADS SEPARATOR */}
-        <div 
-          style={{ 
-            width: '100%',
-            height: '150px',
-            position: 'relative',
-            zIndex: 50,             /* Keeps the waves rendering ON TOP of the footer */
-            marginBottom: '-75px',  /* Pulls the footer UP by exactly half the container's height */
-            pointerEvents: 'auto' 
-          }}
-        >
-          <Threads
-            amplitude={2}
-            distance={0.2}
-            enableMouseInteraction={true}
-            color={[1, 1, 1]}
-          />
+            <div className="separator-band" aria-hidden="true">
+              <div className="threads-wrap">
+                <Threads
+                  tricolor
+                  amplitude={2.5}
+                  distance={0.3}
+                  lineWidth={20}
+                  enableMouseInteraction={true}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Footer />
         </div>
-
-        <Footer />
       </div>
 
     </div>
