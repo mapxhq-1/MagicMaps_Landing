@@ -1,8 +1,9 @@
 .scrollContainer {
-  height: 400vh;
-  /* Giving enough scroll height for smooth scrubbing */
+  height: 520vh;
+  /* Taller track = smaller progress steps per wheel tick = smoother scrub */
   position: relative;
   width: 100%;
+  contain: strict;
 }
 
 .stickyContainer {
@@ -13,6 +14,8 @@
   overflow: hidden;
   background-color: #000;
   z-index: 12;
+  contain: layout style paint;
+  transform: translateZ(0);
   /* Slight lift so fullscreen reads above the recessed sponsors strip */
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.65),
@@ -26,6 +29,8 @@
   object-fit: cover;
   transition: opacity 0.5s ease;
   pointer-events: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .loader {

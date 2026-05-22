@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { subscribeScrollPerf } from '../../utils/scrollPerf';
 import styles from './DirectionalCursor.module.css';
 
-/* SVG tip at (4,4) points upper-left; +135° aligns tip with movement angle (0° = right) */
 const ARROW_BASE_OFFSET_DEG = 135;
 const MOVE_THRESHOLD_SQ = 16;
 const ANGLE_LERP = 0.35;
@@ -36,6 +36,9 @@ export default function DirectionalCursor() {
   const cursorRef = useRef(null);
   const angleRef = useRef(-ARROW_BASE_OFFSET_DEG);
   const lastPosRef = useRef({ x: 0, y: 0 });
+  const pendingRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+  const isScrollingRef = useRef(false);
   const [visible, setVisible] = useState(false);
   const [interactive, setInteractive] = useState(false);
 
@@ -45,30 +48,45 @@ export default function DirectionalCursor() {
 
     document.documentElement.classList.add('directional-cursor-active');
 
+    const unsubscribeScroll = subscribeScrollPerf((scrolling) => {
+      isScrollingRef.current = scrolling;
+    });
+
+    const flush = () => {
+      rafRef.current = null;
+      const node = cursorRef.current;
+      if (!node) return;
+
+      const { x, y } = pendingRef.current;
+      node.style.transform = `translate3d(${x - 4}px, ${y - 4}px, 0) rotate(${angleRef.current}deg)`;
+
+      if (!isScrollingRef.current) {
+        const el = document.elementFromPoint(x, y);
+        const hide = isTextInput(el);
+        const overInteractive = !hide && isInteractive(el);
+        setVisible(!hide);
+        setInteractive(overInteractive);
+      }
+    };
+
     const onMove = (e) => {
       const { clientX: x, clientY: y } = e;
+      pendingRef.current = { x, y };
+
       const last = lastPosRef.current;
       const dx = x - last.x;
       const dy = y - last.y;
 
-      if (dx * dx + dy * dy >= MOVE_THRESHOLD_SQ) {
+      if (!isScrollingRef.current && dx * dx + dy * dy >= MOVE_THRESHOLD_SQ) {
         const targetDeg =
           (Math.atan2(dy, dx) * 180) / Math.PI + ARROW_BASE_OFFSET_DEG;
         angleRef.current = lerpAngle(angleRef.current, targetDeg, ANGLE_LERP);
         lastPosRef.current = { x, y };
       }
 
-      const el = document.elementFromPoint(x, y);
-      const hide = isTextInput(el);
-      const overInteractive = !hide && isInteractive(el);
-
-      setVisible(!hide);
-      setInteractive(overInteractive);
-
-      const node = cursorRef.current;
-      if (!node) return;
-
-      node.style.transform = `translate3d(${x - 4}px, ${y - 4}px, 0) rotate(${angleRef.current}deg)`;
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(flush);
+      }
     };
 
     const onLeave = () => setVisible(false);
@@ -80,6 +98,8 @@ export default function DirectionalCursor() {
 
     return () => {
       document.documentElement.classList.remove('directional-cursor-active');
+      unsubscribeScroll();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', onMove);
       document.documentElement.removeEventListener('mouseleave', onLeave);
       document.documentElement.removeEventListener('mouseenter', onEnter);

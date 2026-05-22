@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
+import { createVideoScrollSeeker } from '../../utils/videoScrollSeek';
 import styles from './ScrollVideo.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,42 +13,63 @@ export default function ScrollVideo({ videoSrc }) {
   const videoRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Still use blob pre-fetching for instant HTTP load access
   useEffect(() => {
-    let objectUrl;
-    fetch(videoSrc)
-      .then((res) => res.blob())
-      .then((blob) => {
-        objectUrl = URL.createObjectURL(blob);
-        if (videoRef.current) {
-          videoRef.current.src = objectUrl;
-          videoRef.current.onloadedmetadata = () => setIsLoaded(true);
-        }
-      });
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const onReady = () => {
+      video.pause();
+      setIsLoaded(true);
+    };
+
+    video.src = videoSrc;
+    video.load();
+
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      onReady();
+    } else {
+      video.addEventListener('canplaythrough', onReady, { once: true });
+    }
+
     return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      video.removeEventListener('canplaythrough', onReady);
+      video.removeAttribute('src');
+      video.load();
     };
   }, [videoSrc]);
 
-  useGSAP(() => {
-    if (!isLoaded || !videoRef.current) return;
+  useGSAP(
+    () => {
+      if (!isLoaded || !videoRef.current || !containerRef.current) return undefined;
 
-    const video = videoRef.current;
-    if (isNaN(video.duration) || video.duration === 0) return;
+      const video = videoRef.current;
+      const duration = video.duration;
+      if (!duration || Number.isNaN(duration)) return undefined;
 
-    // Use pure GSAP scrubbing! Since every frame is a keyframe, the browser decoder can instantly seek to any progress value, giving 60FPS fluid motion.
-    let tl = gsap.timeline({
-      scrollTrigger: {
+      const seeker = createVideoScrollSeeker(video);
+      seeker.setDuration(duration);
+
+      const trigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.5, // 0.5 adds slight interpolation for extra smoothness
-      }
-    });
+        scrub: 0.35,
+        fastScrollEnd: 2500,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          seeker.seek(self.progress, self.getVelocity());
+        },
+      });
 
-    tl.to(video, { currentTime: video.duration, ease: 'none' });
-
-  }, [isLoaded], { scope: containerRef });
+      return () => {
+        seeker.dispose();
+        trigger.kill();
+      };
+    },
+    [isLoaded],
+    { scope: containerRef },
+  );
 
   return (
     <div className={styles.scrollContainer} ref={containerRef}>
@@ -59,8 +81,9 @@ export default function ScrollVideo({ videoSrc }) {
           playsInline
           muted
           preload="auto"
+          disablePictureInPicture
           style={{ opacity: isLoaded ? 1 : 0 }}
-        ></video>
+        />
         <div className={styles.exploreBtnWrap}>
           <NeonCtaButton>Try Now</NeonCtaButton>
         </div>

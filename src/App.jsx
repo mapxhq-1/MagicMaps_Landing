@@ -20,8 +20,14 @@ import Threads from './components/ReactBits/Threads'; // Adjust path as needed
 import vid1 from './assets/videos/vid1-kf.mp4';
 import vid2 from './assets/videos/vid2-kf.mp4';
 import './App.css';
+import { initScrollPerf } from './utils/scrollPerf';
 
 gsap.registerPlugin(ScrollTrigger);
+
+ScrollTrigger.config({
+  limitCallbacks: true,
+  ignoreMobileResize: true,
+});
 
 function App() {
   const quoteSectionRef = useRef(null);
@@ -30,9 +36,25 @@ function App() {
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      ScrollTrigger.refresh();
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const cleanupScrollPerf = initScrollPerf();
+
+    const refreshTriggers = () => ScrollTrigger.refresh();
+    const refreshTimer = window.setTimeout(refreshTriggers, 400);
+
+    window.addEventListener('load', refreshTriggers);
+
+    return () => {
+      cleanupScrollPerf();
+      window.clearTimeout(refreshTimer);
+      window.removeEventListener('load', refreshTriggers);
+    };
   }, []);
 
   return (

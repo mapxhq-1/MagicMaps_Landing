@@ -274,7 +274,21 @@ const Threads = ({
       container.addEventListener('mouseleave', handleMouseLeave);
     }
 
+    let isVisible = true;
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
+
     function update(t) {
+      if (!isVisible) {
+        animationFrameId.current = requestAnimationFrame(update);
+        return;
+      }
+
       if (enableMouseInteraction) {
         const smoothing = 0.05;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);
@@ -293,6 +307,7 @@ const Threads = ({
     animationFrameId.current = requestAnimationFrame(update);
 
     return () => {
+      visibilityObserver.disconnect();
       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
       window.removeEventListener('resize', resize);
 

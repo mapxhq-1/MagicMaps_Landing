@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
+import { subscribeScrollPerf } from '../../utils/scrollPerf';
 
 
 const throttle = (func, limit) => {
@@ -42,6 +43,7 @@ const DotGrid = ({
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   const dotsRef = useRef([]);
+  const isScrollingRef = useRef(false);
   const pointerRef = useRef({
     x: 0,
     y: 0,
@@ -104,35 +106,39 @@ const DotGrid = ({
   }, [dotSize, gap]);
 
   useEffect(() => {
-    if (!circlePath) return;
+    if (!circlePath) return undefined;
 
-    let rafId;
+    let rafId = null;
+    let running = true;
     const proxSq = proximity * proximity;
 
-    const draw = () => {
+    const paint = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      const scrolling = isScrollingRef.current;
       const { x: px, y: py } = pointerRef.current;
 
       for (const dot of dotsRef.current) {
-        const ox = dot.cx + dot.xOffset;
-        const oy = dot.cy + dot.yOffset;
-        const dx = dot.cx - px;
-        const dy = dot.cy - py;
-        const dsq = dx * dx + dy * dy;
+        const ox = scrolling ? dot.cx : dot.cx + dot.xOffset;
+        const oy = scrolling ? dot.cy : dot.cy + dot.yOffset;
 
         let style = baseColor;
-        if (dsq <= proxSq) {
-          const dist = Math.sqrt(dsq);
-          const t = 1 - dist / proximity;
-          const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
-          const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
-          const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-          style = `rgb(${r},${g},${b})`;
+        if (!scrolling) {
+          const dx = dot.cx - px;
+          const dy = dot.cy - py;
+          const dsq = dx * dx + dy * dy;
+          if (dsq <= proxSq) {
+            const dist = Math.sqrt(dsq);
+            const t = 1 - dist / proximity;
+            const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
+            const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
+            const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
+            style = `rgb(${r},${g},${b})`;
+          }
         }
 
         ctx.save();
@@ -141,12 +147,43 @@ const DotGrid = ({
         ctx.fill(circlePath);
         ctx.restore();
       }
-
-      rafId = requestAnimationFrame(draw);
     };
 
-    draw();
-    return () => cancelAnimationFrame(rafId);
+    const loop = () => {
+      if (!running) return;
+      paint();
+      if (isScrollingRef.current) {
+        rafId = null;
+        return;
+      }
+      rafId = requestAnimationFrame(loop);
+    };
+
+    const resumeLoop = () => {
+      if (!running || rafId != null) return;
+      rafId = requestAnimationFrame(loop);
+    };
+
+    const unsubScroll = subscribeScrollPerf((scrolling) => {
+      isScrollingRef.current = scrolling;
+      if (scrolling) {
+        if (rafId != null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+        paint();
+      } else {
+        resumeLoop();
+      }
+    });
+
+    loop();
+
+    return () => {
+      running = false;
+      unsubScroll();
+      if (rafId != null) cancelAnimationFrame(rafId);
+    };
   }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
 
   useEffect(() => {
@@ -166,6 +203,7 @@ const DotGrid = ({
 
   useEffect(() => {
     const onMove = e => {
+      if (isScrollingRef.current) return;
       const now = performance.now();
       const pr = pointerRef.current;
       const dt = pr.lastTime ? now - pr.lastTime : 16;
