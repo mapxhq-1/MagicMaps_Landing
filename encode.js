@@ -51,7 +51,8 @@ const extractFrames = (inputName, outputFolderName, fps = 15) => {
       fs.mkdirSync(absoluteOutputDir, { recursive: true });
     }
 
-    const outputPath = path.join(absoluteOutputDir, 'frame_%04d.jpg').replace(/\\/g, '/');
+    // CHANGED: Outputting to .webp instead of .jpg
+    const outputPath = path.join(absoluteOutputDir, 'frame_%04d.webp').replace(/\\/g, '/');
 
     console.log(`Starting Mobile frame extraction for ${outputFolderName}...`);
 
@@ -59,10 +60,16 @@ const extractFrames = (inputName, outputFolderName, fps = 15) => {
       .outputOptions([
         `-r ${fps}`, 
         
-        // NO MORE CROP! Just scale the 16:9 video to 720px wide.
-        '-vf scale=720:-2', 
+        // CHANGED: Reduced width to 480px (perfect for mobile, huge file size savings)
+        '-vf scale=480:-2', 
         
-        '-q:v 2', 
+        // CHANGED: Using the WebP codec
+        '-c:v libwebp',
+        
+        // CHANGED: WebP quality scale is 0-100 (higher is better). 
+        // 50-60 is the sweet spot for fast web loading.
+        '-q:v 50', 
+        
         '-f image2' 
       ])
       .output(outputPath)

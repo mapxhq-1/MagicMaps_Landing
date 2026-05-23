@@ -58,7 +58,12 @@ function App() {
   }, []);
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh' }}>
+    <div style={{ 
+      position: 'relative', 
+      minHeight: '100vh', 
+      width: '100%',         /* Ensure it respects the parent #root width */
+      overflowX: 'clip'      /* Hard-clip any bleeding canvas/GSAP elements */
+    }}>
       <DirectionalCursor />
       
       <div 
@@ -66,11 +71,11 @@ function App() {
     position: 'fixed',
     top: 0,
     left: 0,
-    width: '100vw',
-    height: '100vh',
+    width: '100%',
+    height: '100%',
     zIndex: 0,
     pointerEvents: 'none',
-    backgroundColor: '#0a0a0a' /* Deep, rich black/gray */
+    backgroundColor: 'transparent' /* Deep, rich black/gray */
   }}
 >
   <DotGrid
@@ -84,8 +89,6 @@ function App() {
   />
 </div>
 
-      {/* 3. THE CONTENT LAYER */}
-      {/* Everything here sits ON TOP of the grid */}
       <div style={{ position: 'relative', zIndex: 10 }}>
         
         <HeroHeader />
