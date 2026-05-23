@@ -10,7 +10,7 @@
   font-family: 'General Sans', sans-serif;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-h);
   margin: 0;
   letter-spacing: -0.05em;
   /* Removed bg, border, and padding as per user request */
@@ -19,13 +19,20 @@
 /* --- NEW: Mobile sizing --- */
 @media (max-width: 768px) {
   .logoContainer {
-    top: 1rem;
-    left: 1rem;
+    top: 0.85rem;
+    left: 0.85rem;
   }
 
   .logoText {
-    font-size: 1.25rem; /* Makes the text smaller for phones */
+    font-size: 1.15rem;
   }
+}
+
+:global(.phoneScreen) .logoContainer {
+  position: fixed;
+  top: 2.85rem;
+  left: 1rem;
+  width: max-content;
 }
 
 @media (prefers-color-scheme: dark) {

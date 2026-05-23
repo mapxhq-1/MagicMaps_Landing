@@ -71,7 +71,10 @@ const DotGrid = ({
     const canvas = canvasRef.current;
     if (!wrap || !canvas) return;
 
-    const { width, height } = wrap.getBoundingClientRect();
+    const width = wrap.clientWidth;
+    const height = wrap.clientHeight;
+    if (!width || !height) return;
+
     const dpr = window.devicePixelRatio || 1;
 
     canvas.width = width * dpr;

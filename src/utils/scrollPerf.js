@@ -13,7 +13,7 @@ export function subscribeScrollPerf(callback) {
   return () => listeners.delete(callback);
 }
 
-export function initScrollPerf() {
+export function initScrollPerf(scroller = window) {
   const markScrolling = () => {
     if (!isScrolling) {
       isScrolling = true;
@@ -26,15 +26,28 @@ export function initScrollPerf() {
     }, 180);
   };
 
-  window.addEventListener('wheel', markScrolling, { passive: true });
-  window.addEventListener('touchmove', markScrolling, { passive: true });
-  window.addEventListener('scroll', markScrolling, { passive: true });
+  if (scroller === window) {
+    window.addEventListener('wheel', markScrolling, { passive: true });
+    window.addEventListener('touchmove', markScrolling, { passive: true });
+    window.addEventListener('scroll', markScrolling, { passive: true });
+
+    return () => {
+      clearTimeout(scrollEndTimer);
+      window.removeEventListener('wheel', markScrolling);
+      window.removeEventListener('touchmove', markScrolling);
+      window.removeEventListener('scroll', markScrolling);
+      isScrolling = false;
+      notify();
+    };
+  }
+
+  scroller.addEventListener('scroll', markScrolling, { passive: true });
+  scroller.addEventListener('touchmove', markScrolling, { passive: true });
 
   return () => {
     clearTimeout(scrollEndTimer);
-    window.removeEventListener('wheel', markScrolling);
-    window.removeEventListener('touchmove', markScrolling);
-    window.removeEventListener('scroll', markScrolling);
+    scroller.removeEventListener('scroll', markScrolling);
+    scroller.removeEventListener('touchmove', markScrolling);
     isScrolling = false;
     notify();
   };

@@ -1,28 +1,29 @@
 @import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@700&display=swap');
 
 :root {
-  /* Dark theme palette */
-  --text: #d7e1d8;
-  --text-h: #f0f8f1;
-  --bg: #000000;
-  --border: #2a2a2a;
-  --code-bg: #141414;
-  --accent: #a8e6b0;
-  --accent-light: #c8f3ce;
-  --accent-bg: rgba(168, 230, 176, 0.14);
-  --accent-border: rgba(168, 230, 176, 0.45);
-  --social-bg: rgba(30, 30, 30, 0.7);
+  /* Light pastel palette */
+  --text: #4a524d;
+  --text-h: #222924;
+  --bg: #f6f4f1;
+  --border: #e4dfd8;
+  --code-bg: #ece8e2;
+  --accent: #6bc978;
+  --accent-light: #9adda5;
+  --accent-bg: rgba(107, 201, 120, 0.14);
+  --accent-border: rgba(107, 201, 120, 0.4);
+  --social-bg: rgba(255, 255, 255, 0.72);
   --quote-display: 'Cormorant Garamond', serif;
 
   /* Minimal glass scrollbar */
   --scrollbar-size: 5px;
-  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.32);
+  --scrollbar-thumb: rgba(60, 60, 60, 0.22);
+  --scrollbar-thumb-hover: rgba(60, 60, 60, 0.36);
   --scrollbar-track: transparent;
 
-  /* Earthy shadows */
-  --shadow: rgba(0, 0, 0, 0.5) 0 10px 15px -3px, rgba(0, 0, 0, 0.35) 0 4px 6px -2px;
+  /* Soft shadows for light UI */
+  --shadow: rgba(40, 40, 40, 0.08) 0 10px 15px -3px, rgba(40, 40, 40, 0.06) 0 4px 6px -2px;
 
   /* Default UI/body copy */
   --sans: 'General Sans', system-ui, sans-serif;
@@ -33,7 +34,7 @@
 
   font: 18px/145% var(--serif);
   letter-spacing: 0.18px;
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
 
@@ -99,19 +100,19 @@ html.directional-cursor-active textarea {
 *::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.14) 100%
+    rgba(60, 60, 60, 0.28) 0%,
+    rgba(60, 60, 60, 0.16) 100%
   );
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(60, 60, 60, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 *::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.22) 100%
+    rgba(60, 60, 60, 0.4) 0%,
+    rgba(60, 60, 60, 0.24) 100%
   );
 }
 

@@ -13,12 +13,14 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
+  const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
   const imagesRef = useRef([]);
 
   // --- State for the rotating word ---
   const [wordIndex, setWordIndex] = useState(0);
-  const rotatingWords = ['Think', 'React', 'Understand'];
+  const rotatingWords = ['Think', 'React', 'Revice'];
+  const longestWord = rotatingWords.reduce((a, b) => (a.length >= b.length ? a : b));
 
   // --- Effect to rotate the word every 2.5 seconds ---
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
           canvas.height = img.height;
           ctx.imageSmoothingEnabled = false;
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          setHasFirstFrame(true);
         }
       }
 
@@ -132,98 +135,73 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
   return (
     <div className={styles.scrollContainer} ref={containerRef}>
-      <div className={styles.stickyContainer}>
-        {!isReady && (
-          <div className={styles.loader}>
-            Loading Experience... {loadProgress}%
-          </div>
-        )}
-{/* --- Smooth Rotating Text Component --- */}
-        <div 
-          style={{
-            position: 'absolute',
-            top: '20%',
-            left: 0,
-            width: '100%',
-            textAlign: 'center', 
-            zIndex: 20,
-            color: 'var(--text)',
-            fontSize: '1rem',
-            opacity: isReady ? 0.7 : 0,
-            transition: 'opacity 1s ease',
-            pointerEvents: 'none',
-            padding: '0 1.25rem',
-            boxSizing: 'border-box' 
-          }}
-        >
-          {/* Changed motion.div to standard div. We ONLY want the children to animate their layouts. */}
-          <div 
-            style={{ 
-              margin: 0, 
-              fontWeight: 300, 
-              lineHeight: 1.5,
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            {/* Left text */}
-            <motion.span 
-              layout 
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              The Map that&nbsp;
-            </motion.span>
-            
-            {/* Center wrapper */}
-            <motion.span 
-              layout 
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              style={{ display: 'inline-flex', position: 'relative', alignItems: 'center' }} 
-            >
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  layout /* CRITICAL: This allows the exiting word to track the sentence and slide while it fades! */
-                  key={wordIndex}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  style={{
-                    color: 'var(--accent)',
-                    fontWeight: 500,
-                    whiteSpace: 'nowrap'
-                  }}
+      <div className={`${styles.stickyContainer} ${styles.stickyContainerCard}`}>
+        <div className={styles.heroText}>
+          <div className={styles.heroTextLine}>
+            <span>The Map that</span>
+
+            <span className={styles.heroWordSlot}>
+              <span className={styles.heroWordMeasure} aria-hidden="true">
+                {longestWord}
+              </span>
+              <span className={styles.heroWordInner}>
+                <span className={styles.heroWordArea}>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={wordIndex}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
+                      transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      className={styles.heroWord}
+                    >
+                      {rotatingWords[wordIndex]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+                <svg
+                  className={styles.heroMarkerUnderline}
+                  viewBox="0 0 120 18"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
                 >
-                  {rotatingWords[wordIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </motion.span>
-            
-            {/* Right text */}
-            <motion.span 
-              layout 
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            >
-              &nbsp;and help in your studies!!
-            </motion.span>
+                  <path
+                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeMain}`}
+                    d="M2 14 C 22 13, 42 6, 60 5 S 98 6, 118 14"
+                  />
+                  <path
+                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeSoft}`}
+                    d="M4 15 C 24 14, 44 8, 60 7 S 96 8, 116 15"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <p className={styles.heroTextSubline}>along with you</p>
+        </div>
+
+        <div className={styles.cardStage}>
+          <div className={styles.floatingCard}>
+          {!isReady && (
+            <div className={styles.loader}>
+              Loading Experience... {loadProgress}%
+            </div>
+          )}
+
+          <canvas
+            ref={canvasRef}
+            className={styles.video}
+            style={{
+              opacity: hasFirstFrame ? 1 : 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+            }}
+          />
           </div>
         </div>
-        {/* --- END Rotating Text --- */}
 
-        <canvas
-          ref={canvasRef}
-          className={styles.video}
-          style={{
-            opacity: isReady ? 1 : 0,
-            width: '100%',
-            height: '100vh',
-            objectFit: 'contain',
-          }}
-        />
-
-        <div className={styles.exploreBtnWrap}>
+        <div className={styles.cardCtaWrap}>
           <NeonCtaButton>Try Now</NeonCtaButton>
         </div>
       </div>
