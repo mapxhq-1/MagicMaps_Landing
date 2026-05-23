@@ -95,7 +95,7 @@ function App() {
 
         {isMobile ? (
           
-          <ScrollImageSequence frameCount={600} framePath="/frames/vid1_mobile/frame_" />
+          <ScrollImageSequence frameCount={561} framePath="/frames/vid2_mobile/frame_" />
         ) : (
           <ScrollVideo videoSrc={vid1} />
         )}
@@ -103,7 +103,7 @@ function App() {
         <Sponsors />
 
         {isMobile ? (
-          <ScrollImageSequence frameCount={561} framePath="/frames/vid2_mobile/frame_" />
+          <ScrollImageSequence frameCount={600} framePath="/frames/vid1_mobile/frame_" />
         ) : (
           <ScrollVideo videoSrc={vid2} />
         )}

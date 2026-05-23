@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import { motion, AnimatePresence } from 'framer-motion'; // <-- NEW IMPORT
 import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
 import { createCanvasScrollRenderer } from '../../utils/canvasScrollFrame';
 import styles from './ScrollVideo.module.css';
@@ -14,6 +15,18 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
   const [isReady, setIsReady] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
   const imagesRef = useRef([]);
+
+  // --- State for the rotating word ---
+  const [wordIndex, setWordIndex] = useState(0);
+  const rotatingWords = ['Think', 'React', 'Understand'];
+
+  // --- Effect to rotate the word every 2.5 seconds ---
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % rotatingWords.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,6 +138,79 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
             Loading Experience... {loadProgress}%
           </div>
         )}
+{/* --- Smooth Rotating Text Component --- */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: '20%',
+            left: 0,
+            width: '100%',
+            textAlign: 'center', 
+            zIndex: 20,
+            color: 'var(--text)',
+            fontSize: '1rem',
+            opacity: isReady ? 0.7 : 0,
+            transition: 'opacity 1s ease',
+            pointerEvents: 'none',
+            padding: '0 1.25rem',
+            boxSizing: 'border-box' 
+          }}
+        >
+          {/* Changed motion.div to standard div. We ONLY want the children to animate their layouts. */}
+          <div 
+            style={{ 
+              margin: 0, 
+              fontWeight: 300, 
+              lineHeight: 1.5,
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {/* Left text */}
+            <motion.span 
+              layout 
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              The Map that&nbsp;
+            </motion.span>
+            
+            {/* Center wrapper */}
+            <motion.span 
+              layout 
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              style={{ display: 'inline-flex', position: 'relative', alignItems: 'center' }} 
+            >
+              <AnimatePresence mode="popLayout">
+                <motion.span
+                  layout /* CRITICAL: This allows the exiting word to track the sentence and slide while it fades! */
+                  key={wordIndex}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  style={{
+                    color: 'var(--accent)',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {rotatingWords[wordIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </motion.span>
+            
+            {/* Right text */}
+            <motion.span 
+              layout 
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            >
+              &nbsp;and help in your studies!!
+            </motion.span>
+          </div>
+        </div>
+        {/* --- END Rotating Text --- */}
 
         <canvas
           ref={canvasRef}

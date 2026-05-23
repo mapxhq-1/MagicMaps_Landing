@@ -16,6 +16,18 @@
   /* Removed bg, border, and padding as per user request */
 }
 
+/* --- NEW: Mobile sizing --- */
+@media (max-width: 768px) {
+  .logoContainer {
+    top: 1rem;
+    left: 1rem;
+  }
+
+  .logoText {
+    font-size: 1.25rem; /* Makes the text smaller for phones */
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .logoText {
     /* No bg for dark mode either */

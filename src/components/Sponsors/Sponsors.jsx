@@ -42,9 +42,12 @@ function SponsorLogo({ logo, isTouch, isActive, onToggle }) {
         <img src={logo.src} alt="" className={styles.logo} />
       </div>
 
-      <span className={styles.label} role="tooltip">
-        {logo.label}
-      </span>
+      {/* CHANGED: Completely removes the PC tooltip from the DOM on mobile */}
+      {!isTouch && (
+        <span className={styles.label} role="tooltip">
+          {logo.label}
+        </span>
+      )}
     </div>
   );
 }
@@ -73,6 +76,9 @@ export default function Sponsors() {
     setActiveKey((prev) => (prev === key ? null : key));
   };
 
+  // Find the text for the currently tapped logo
+  const activeLogoLabel = logos.find((logo) => logo.src === activeKey)?.label;
+
   return (
     <section className={styles.wrapper} aria-label="Backed by funding partners">
       <div className={styles.surface}>
@@ -92,6 +98,13 @@ export default function Sponsors() {
               />
             ))}
           </div>
+          
+          {/* NEW: Centralized text area. CSS will hide this on Desktop. */}
+          <div className={styles.mobileCenterText}>
+            {/* If a logo is tapped, show text. Otherwise, keep a space so layout doesn't jump */}
+            {activeLogoLabel ? activeLogoLabel : ' '} 
+          </div>
+
         </div>
       </div>
     </section>

@@ -149,6 +149,26 @@
   transform: translateX(-50%);
   transition: opacity 0.15s ease, visibility 0.15s;
 }
+/* By default (Desktop), hide the centralized text area entirely */
+.mobileCenterText {
+  display: none;
+}
+
+/* On Mobile screens (768px and below) */
+@media (max-width: 768px) {
+  .mobileCenterText {
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-top: 1rem;
+    min-height: 2.5rem;   
+    font-size: 0.75rem;    /* Made the text smaller (approx 12px) */
+    line-height: 1.3;
+    color: var(--text-h);
+    opacity: 0.8;          /* Softens the text slightly */
+    padding: 0 1rem;       /* Prevents text from touching screen edges */
+  }
+}
 
 /* Desktop / fine pointer: label only while cursor is over the icon */
 @media (hover: hover) and (pointer: fine) {
