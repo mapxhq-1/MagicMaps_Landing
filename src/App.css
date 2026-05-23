@@ -104,6 +104,20 @@
   transform: translateY(-2rem);
 }
 
+@media (max-width: 768px) {
+  .pre-footer-cta {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0 1.25rem 0.35rem;
+  box-sizing: border-box;
+  background: transparent;
+  transform: translateY(-5rem);
+}
+}
 /* Footer separator = 1px line (stays here; do not move this for thread alignment) */
 .separator-band {
   position: relative;

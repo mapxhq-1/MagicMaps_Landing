@@ -44,11 +44,19 @@
   z-index: 5;
 }
 
-/* Neon CTA: positioning only — visuals in NeonCtaButton */
 .exploreBtnWrap {
   position: absolute;
   bottom: 2.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
+}
+
+@media (max-width: 768px) {
+  .exploreBtnWrap {
+    bottom: 150px;
+    left: 50%;        /* Clear the left centering */
+    transform: translateX(-50%);
+    z-index: 9999;     /* Force it above the video */
+  }
 }
