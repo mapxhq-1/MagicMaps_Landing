@@ -6,6 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroHeader from './components/HeroHeader/HeroHeader';
 import ScrollVideo from './components/ScrollVideo/ScrollVideo';
 import ScrollImageSequence from './components/ScrollVideo/ScrollImageSequence'; 
+import DesktopMapTextSection from './components/ScrollVideo/DesktopMapTextSection';
+import MobileFeatureCardsSection from './components/ScrollVideo/MobileFeatureCardsSection';
 import Sponsors from './components/Sponsors/Sponsors';
 import ScrollReveal from './components/ReactBits/ScrollReveal';
 import Footer from './components/Footer/Footer';
@@ -94,6 +96,9 @@ function App() {
       ) : (
         <ScrollVideo videoSrc={vid2} />
       )}
+
+      {!isMobile && <DesktopMapTextSection />}
+      {isMobile && <MobileFeatureCardsSection />}
 
       <section className="quote-section" ref={quoteSectionRef}>
         <div className="quote-sticky">

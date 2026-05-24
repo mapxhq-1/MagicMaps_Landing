@@ -73,17 +73,19 @@ export default function ScrollVideo({ videoSrc }) {
 
   return (
     <div className={styles.scrollContainer} ref={containerRef}>
-      <div className={styles.stickyContainer}>
-        {!isLoaded && <div className={styles.loader}>Loading Video Buffer...</div>}
-        <video
-          ref={videoRef}
-          className={styles.video}
-          playsInline
-          muted
-          preload="auto"
-          disablePictureInPicture
-          style={{ opacity: isLoaded ? 1 : 0 }}
-        />
+      <div className={`${styles.stickyContainer} ${styles.videoStickyContainer}`}>
+        <div className={styles.videoCard}>
+          {!isLoaded && <div className={styles.loader}>Loading Video Buffer...</div>}
+          <video
+            ref={videoRef}
+            className={styles.video}
+            playsInline
+            muted
+            preload="auto"
+            disablePictureInPicture
+            style={{ opacity: isLoaded ? 1 : 0 }}
+          />
+        </div>
         <div className={styles.exploreBtnWrap}>
           <NeonCtaButton>Try Now</NeonCtaButton>
         </div>

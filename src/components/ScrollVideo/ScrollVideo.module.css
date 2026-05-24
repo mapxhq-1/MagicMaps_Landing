@@ -28,6 +28,41 @@
   backface-visibility: hidden;
 }
 
+.videoStickyContainer {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding:
+    clamp(2rem, 5vh, 4rem)
+    clamp(1rem, 5vw, 4rem)
+    clamp(6rem, 11vh, 7rem);
+}
+
+.videoCard {
+  position: relative;
+  width: min(
+    1120px,
+    calc(100vw - clamp(2rem, 10vw, 8rem)),
+    calc((100svh - 9rem) * 16 / 9)
+  );
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: clamp(1rem, 2.8vw, 1.75rem);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 3px 7px rgba(40, 40, 40, 0.06),
+    0 16px 34px rgba(40, 40, 40, 0.12),
+    0 36px 64px rgba(40, 40, 40, 0.1);
+  transform: translateZ(0);
+}
+
+.videoCard .video {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
 .loader {
   position: absolute;
   top: 50%;
@@ -168,6 +203,171 @@
   z-index: 20;
 }
 
+.desktopMapTextSection {
+  min-height: 120vh;
+  width: 100%;
+  padding:
+    clamp(4rem, 10vh, 7rem)
+    clamp(0.75rem, 2vw, 2rem)
+    clamp(7rem, 16vh, 11rem);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 12;
+}
+
+.desktopMapTextSticky {
+  min-height: calc(120vh - clamp(8rem, 20vh, 14rem));
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(4rem, 9vh, 6rem);
+  box-sizing: border-box;
+}
+
+.desktopMapText {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 100%;
+  padding: 0;
+  font-size: clamp(2.35rem, 4vw, 5rem);
+  line-height: 1.18;
+  gap: 0.2em;
+  letter-spacing: 0.02em;
+  word-spacing: 0.08em;
+}
+
+.desktopMapText .heroTextLine {
+  display: flex;
+}
+
+.desktopMapText .heroTextSubline {
+  margin-top: 0.08em;
+}
+
+.desktopMapCaption {
+  margin: clamp(3rem, 8vh, 6rem) 0 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.desktopFeatureDeck {
+  position: relative;
+  width: min(86vw, 880px);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  margin-top: clamp(8rem, 20vh, 13rem);
+  perspective: 1000px;
+}
+
+.desktopFeatureCard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  opacity: var(--card-opacity);
+  z-index: var(--card-z);
+  transform:
+    translate(-50%, -50%)
+    translate(var(--card-x), var(--card-y))
+    perspective(1000px)
+    rotateX(var(--hover-rotate-x))
+    rotateY(var(--hover-rotate-y))
+    rotate(var(--card-rotate))
+    scale(var(--card-scale));
+  filter:
+    drop-shadow(0 12px 18px rgba(40, 40, 40, 0.24))
+    drop-shadow(0 34px 54px rgba(40, 40, 40, 0.32));
+  transition:
+    transform 180ms ease,
+    opacity 520ms ease,
+    filter 520ms ease;
+  will-change: transform, opacity;
+  user-select: none;
+  transform-style: preserve-3d;
+}
+
+.desktopFeatureControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 1.5vw, 1.15rem);
+  margin-top: clamp(1.35rem, 3vh, 2rem);
+}
+
+.desktopFeatureButton {
+  border: 1px solid rgba(21, 128, 61, 0.28);
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--text-h);
+  font-family: var(--sans);
+  font-size: clamp(0.85rem, 1vw, 0.98rem);
+  font-weight: 700;
+  line-height: 1;
+  box-shadow:
+    0 4px 10px rgba(40, 40, 40, 0.06),
+    0 14px 30px rgba(40, 40, 40, 0.12);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.desktopFeatureButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 14px rgba(40, 40, 40, 0.08),
+    0 18px 36px rgba(40, 40, 40, 0.14);
+}
+
+.desktopFeatureButton:disabled {
+  cursor: default;
+  opacity: 0.42;
+}
+
+.mobileFeatureCardsSection {
+  width: 100%;
+  min-height: 58vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding:
+    clamp(3rem, 9vh, 4.5rem)
+    clamp(0.75rem, 4vw, 1.25rem)
+    clamp(4rem, 10vh, 5.5rem);
+  box-sizing: border-box;
+  position: relative;
+  z-index: 12;
+}
+
+.mobileFeatureDeck {
+  width: min(92vw, 390px);
+  margin-top: 0;
+}
+
+.mobileFeatureCardsSection .desktopFeatureControls {
+  margin-top: clamp(1rem, 2.5vh, 1.5rem);
+  gap: 0.65rem;
+}
+
+.mobileFeatureCardsSection .desktopFeatureButton {
+  padding: 0.65rem 0.95rem;
+  font-size: 0.8rem;
+}
+
 /* Floating card layout for mobile image sequence */
 .stickyContainer.stickyContainerCard {
   display: flex;
@@ -217,12 +417,13 @@
 }
 
 .cardStage {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   min-height: 0;
+  margin-top: clamp(0.25rem, 1vh, 0.45rem);
 }
 
 .floatingCard {
@@ -237,10 +438,10 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.72);
   box-shadow:
-    0 2px 4px rgba(40, 40, 40, 0.04),
-    0 14px 32px rgba(40, 40, 40, 0.1),
-    0 36px 64px rgba(40, 40, 40, 0.08);
-  transform: translateZ(0);
+    0 4px 8px rgba(40, 40, 40, 0.08),
+    0 18px 36px rgba(40, 40, 40, 0.16),
+    0 44px 76px rgba(40, 40, 40, 0.14);
+  transform: translateY(-0.55rem) translateZ(0);
 }
 
 .floatingCard .video {
@@ -272,6 +473,23 @@
   margin-top: auto;
   z-index: 20;
   padding-bottom: clamp(0.65rem, 2vh, 1rem);
+}
+
+.cardCaption {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: clamp(0.5rem, 1.6vh, 0.85rem) 0 clamp(0.7rem, 2vh, 1rem);
+  padding: 0 0.35rem;
+  box-sizing: border-box;
+  font-family: 'Kalam', cursive;
+  font-size: clamp(0.9rem, 3.6vw, 1.18rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+  text-align: center;
+  letter-spacing: 0.02em;
+  word-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {

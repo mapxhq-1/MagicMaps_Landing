@@ -19,7 +19,7 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
   // --- State for the rotating word ---
   const [wordIndex, setWordIndex] = useState(0);
-  const rotatingWords = ['Think', 'React', 'Revice'];
+  const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
   const longestWord = rotatingWords.reduce((a, b) => (a.length >= b.length ? a : b));
 
   // --- Effect to rotate the word every 2.5 seconds ---
@@ -177,8 +177,9 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
               </span>
             </span>
           </div>
-          <p className={styles.heroTextSubline}>along with you</p>
         </div>
+
+        <p className={styles.cardCaption}>Specially for Competitive Exam Aspirants !</p>
 
         <div className={styles.cardStage}>
           <div className={styles.floatingCard}>
