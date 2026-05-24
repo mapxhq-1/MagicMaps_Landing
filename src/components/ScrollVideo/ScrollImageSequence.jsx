@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { motion, AnimatePresence } from 'framer-motion'; // <-- NEW IMPORT
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
 import { createCanvasScrollRenderer } from '../../utils/canvasScrollFrame';
 import styles from './ScrollVideo.module.css';
@@ -12,43 +13,62 @@ gsap.registerPlugin(ScrollTrigger);
 export default function ScrollImageSequence({ frameCount, framePath }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const scrollHintRef = useRef(null);
+
   const [isReady, setIsReady] = useState(false);
   const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+
   const imagesRef = useRef([]);
 
-  // --- State for the rotating word ---
+  // Rotating words
   const [wordIndex, setWordIndex] = useState(0);
-  const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
-  const longestWord = rotatingWords.reduce((a, b) => (a.length >= b.length ? a : b));
 
-  // --- Effect to rotate the word every 2.5 seconds ---
+  const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
+
+  const longestWord = rotatingWords.reduce((a, b) =>
+    a.length >= b.length ? a : b,
+  );
+
+  // Rotate words
   useEffect(() => {
     const interval = setInterval(() => {
       setWordIndex((prev) => (prev + 1) % rotatingWords.length);
     }, 2500);
+
     return () => clearInterval(interval);
   }, []);
 
+  // Load image sequence
   useEffect(() => {
     let cancelled = false;
+
     const images = new Array(frameCount);
+
     let loadedCount = 0;
 
     const onFrameLoaded = (index, img) => {
       if (cancelled) return;
+
       loadedCount += 1;
+
       const progress = Math.round((loadedCount / frameCount) * 100);
+
       setLoadProgress(progress);
 
       if (index === 0 && canvasRef.current) {
         const canvas = canvasRef.current;
+
         const ctx = canvas.getContext('2d', { alpha: false });
+
         if (ctx) {
           canvas.width = img.width;
           canvas.height = img.height;
+
           ctx.imageSmoothingEnabled = false;
+
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
           setHasFirstFrame(true);
         }
       }
@@ -60,11 +80,17 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
     for (let i = 1; i <= frameCount; i += 1) {
       const img = new Image();
+
       const index = i - 1;
+
       const paddedIndex = String(i).padStart(4, '0');
+
       img.decoding = 'async';
+
       img.src = `${framePath}${paddedIndex}.jpg`;
+
       img.onload = () => onFrameLoaded(index, img);
+
       images[index] = img;
     }
 
@@ -75,41 +101,55 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
     };
   }, [frameCount, framePath]);
 
+  // Scroll animation
   useGSAP(
     () => {
-      if (!isReady || !canvasRef.current || !containerRef.current) return undefined;
+      if (!isReady || !canvasRef.current || !containerRef.current) {
+        return undefined;
+      }
 
       const canvas = canvasRef.current;
+
       const ctx = canvas.getContext('2d', { alpha: false });
+
       if (!ctx) return undefined;
 
       ctx.imageSmoothingEnabled = false;
+
       const images = imagesRef.current;
 
       const frameStepForVelocity = (velocity) => {
         const v = Math.abs(velocity);
+
         if (v > 3500) return 3;
+
         if (v > 1500) return 2;
+
         return 1;
       };
 
-      const renderer = createCanvasScrollRenderer((progress, velocity, lastFrame) => {
-        const rawIndex = Math.floor(progress * (frameCount - 1));
-        const step = frameStepForVelocity(velocity);
-        const frameIndex = Math.min(
-          frameCount - 1,
-          Math.floor(rawIndex / step) * step,
-        );
+      const renderer = createCanvasScrollRenderer(
+        (progress, velocity, lastFrame) => {
+          const rawIndex = Math.floor(progress * (frameCount - 1));
 
-        if (frameIndex === lastFrame) return -1;
+          const step = frameStepForVelocity(velocity);
 
-        const img = images[frameIndex];
-        if (img?.complete) {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        }
+          const frameIndex = Math.min(
+            frameCount - 1,
+            Math.floor(rawIndex / step) * step,
+          );
 
-        return frameIndex;
-      });
+          if (frameIndex === lastFrame) return -1;
+
+          const img = images[frameIndex];
+
+          if (img?.complete) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          }
+
+          return frameIndex;
+        },
+      );
 
       const trigger = ScrollTrigger.create({
         trigger: containerRef.current,
@@ -119,9 +159,27 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
         fastScrollEnd: 2500,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+
         onUpdate: (self) => {
           renderer.render(self.progress, self.getVelocity());
+
+          if (scrollHintRef.current) {
+            gsap.to(scrollHintRef.current, {
+              opacity: self.progress > 0.03 ? 0 : 1,
+              duration: 0.25,
+              ease: 'power2.out',
+            });
+          }
         },
+      });
+
+      // Floating scroll hint animation
+      gsap.to(scrollHintRef.current, {
+        y: 10,
+        repeat: -1,
+        yoyo: true,
+        duration: 1.2,
+        ease: 'power1.inOut',
       });
 
       return () => {
@@ -144,6 +202,7 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
               <span className={styles.heroWordMeasure} aria-hidden="true">
                 {longestWord}
               </span>
+
               <span className={styles.heroWordInner}>
                 <span className={styles.heroWordArea}>
                   <AnimatePresence mode="wait">
@@ -152,13 +211,17 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.5, ease: 'easeInOut' }}
+                      transition={{
+                        duration: 0.5,
+                        ease: 'easeInOut',
+                      }}
                       className={styles.heroWord}
                     >
                       {rotatingWords[wordIndex]}
                     </motion.span>
                   </AnimatePresence>
                 </span>
+
                 <svg
                   className={styles.heroMarkerUnderline}
                   viewBox="0 0 120 18"
@@ -169,6 +232,7 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
                     className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeMain}`}
                     d="M2 14 C 22 13, 42 6, 60 5 S 98 6, 118 14"
                   />
+
                   <path
                     className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeSoft}`}
                     d="M4 15 C 24 14, 44 8, 60 7 S 96 8, 116 15"
@@ -187,22 +251,31 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
         <div className={styles.cardStage}>
           <div className={styles.floatingCard}>
-          {!isReady && (
-            <div className={styles.loader}>
-              Loading Experience... {loadProgress}%
-            </div>
-          )}
+            {!isReady && (
+              <div className={styles.loader}>
+                Loading Experience... {loadProgress}%
+              </div>
+            )}
 
-          <canvas
-            ref={canvasRef}
-            className={styles.video}
-            style={{
-              opacity: hasFirstFrame ? 1 : 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-            }}
-          />
+            <canvas
+              ref={canvasRef}
+              className={styles.video}
+              style={{
+                opacity: hasFirstFrame ? 1 : 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Scroll Hint */}
+        <div ref={scrollHintRef} className={styles.scrollHint}>
+          <span>Scroll</span>
+
+          <div className={styles.scrollArrow}>
+            <ChevronDown size={18} strokeWidth={2} />
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './ScrollVideo.module.css';
 
@@ -12,6 +12,7 @@ const featuredCards = [
 export default function DesktopMapTextSection() {
   const [wordIndex, setWordIndex] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
   const longestWord = rotatingWords.reduce((a, b) => (a.length >= b.length ? a : b));
 
@@ -22,9 +23,19 @@ export default function DesktopMapTextSection() {
     return () => clearInterval(interval);
   }, []);
 
+  // Auto-advance cards in an infinite loop, pauses on hover
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      setActiveCardIndex((prev) => (prev + 1) % featuredCards.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
   const goToCard = (index) => {
-    const clampedIndex = Math.max(0, Math.min(featuredCards.length - 1, index));
-    setActiveCardIndex(clampedIndex);
+    // Infinite loop: wrap around
+    const wrappedIndex = (index + featuredCards.length) % featuredCards.length;
+    setActiveCardIndex(wrappedIndex);
   };
 
   const handleCardPointerMove = (event) => {
@@ -124,36 +135,96 @@ export default function DesktopMapTextSection() {
           <p className={styles.desktopMapCaption}>Specially for Competitive Exam Aspirants !</p>
         </div>
 
-        <div className={styles.desktopFeatureDeck} aria-label="Magic Maps feature cards">
-          {featuredCards.map((card, index) => (
-            <img
-              key={card.src}
-              className={styles.desktopFeatureCard}
-              style={getCardStyle(index)}
-              onPointerMove={handleCardPointerMove}
-              onPointerLeave={handleCardPointerLeave}
-              src={card.src}
-              alt={card.alt}
-            />
-          ))}
-        </div>
-
-        <div className={styles.desktopFeatureControls} aria-label="Feature card controls">
+        {/* Deck wrapper with flanking arrow buttons */}
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 'min(86vw, 880px)',
+            marginTop: 'clamp(8rem, 20vh, 13rem)',
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Left arrow */}
           <button
-            className={styles.desktopFeatureButton}
             type="button"
+            aria-label="Previous card"
             onClick={() => goToCard(activeCardIndex - 1)}
-            disabled={activeCardIndex === 0}
+            style={{
+              position: 'absolute',
+              left: 'calc(-2.6rem - 8px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 30,
+              background: 'none',
+              border: 'none',
+              padding: '0.4rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0.72,
+              transition: 'opacity 160ms ease, transform 160ms ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'translateY(-50%) scale(1.15)'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = 0.72; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
           >
-            Previous
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="16" cy="16" r="15" stroke="#111" strokeWidth="1.5" fill="rgba(255,255,255,0.7)" />
+              <path d="M18.5 10L12.5 16L18.5 22" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
-          <button
-            className={styles.desktopFeatureButton}
-            type="button"
-            onClick={() => goToCard(activeCardIndex + 1)}
-            disabled={activeCardIndex === featuredCards.length - 1}
+
+          {/* Card deck */}
+          <div
+            className={styles.desktopFeatureDeck}
+            aria-label="Magic Maps feature cards"
+            style={{ marginTop: 0, width: '100%' }}
           >
-            Next Card
+            {featuredCards.map((card, index) => (
+              <img
+                key={card.src}
+                className={styles.desktopFeatureCard}
+                style={getCardStyle(index)}
+                onPointerMove={handleCardPointerMove}
+                onPointerLeave={handleCardPointerLeave}
+                src={card.src}
+                alt={card.alt}
+              />
+            ))}
+          </div>
+
+          {/* Right arrow */}
+          <button
+            type="button"
+            aria-label="Next card"
+            onClick={() => goToCard(activeCardIndex + 1)}
+            style={{
+              position: 'absolute',
+              right: 'calc(-2.6rem - 8px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 30,
+              background: 'none',
+              border: 'none',
+              padding: '0.4rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0.72,
+              transition: 'opacity 160ms ease, transform 160ms ease',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.transform = 'translateY(-50%) scale(1.15)'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = 0.72; e.currentTarget.style.transform = 'translateY(-50%) scale(1)'; }}
+          >
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="16" cy="16" r="15" stroke="#111" strokeWidth="1.5" fill="rgba(255,255,255,0.7)" />
+              <path d="M13.5 10L19.5 16L13.5 22" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
         </div>
       </div>
