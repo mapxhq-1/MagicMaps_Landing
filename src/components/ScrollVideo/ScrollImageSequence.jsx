@@ -179,7 +179,11 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
           </div>
         </div>
 
-        <p className={styles.cardCaption}>Specially for Competitive Exam Aspirants !</p>
+        <p className={styles.cardCaption}>
+          Specially for Competitive Exam
+          <br />
+          Aspirants !
+        </p>
 
         <div className={styles.cardStage}>
           <div className={styles.floatingCard}>

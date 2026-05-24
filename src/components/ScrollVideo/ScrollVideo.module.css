@@ -390,6 +390,22 @@
   min-height: var(--preview-vh, 100%);
 }
 
+:global(.phoneScreen) .stickyContainerCard .heroText,
+:global(.phoneScreen) .stickyContainerCard .cardCaption {
+  transform: translateY(clamp(2.5rem, 8vh, 4rem));
+}
+
+:global(.phoneScreen) .stickyContainerCard .cardStage {
+  align-items: flex-start;
+  padding-top: clamp(5.5rem, 18vh, 8rem);
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+:global(.phoneScreen) .stickyContainerCard .floatingCard {
+  transform: translateZ(0);
+}
+
 .stickyContainerCard .heroText {
   position: relative;
   top: auto;
@@ -417,7 +433,7 @@
 }
 
 .cardStage {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -489,7 +505,6 @@
   text-align: center;
   letter-spacing: 0.02em;
   word-spacing: 0.08em;
-  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -510,5 +525,23 @@
     font-size: clamp(1.1rem, 4.4vw, 1.5rem);
     gap: 0.4em;
     margin-bottom: clamp(0.4rem, 1.2vh, 0.6rem);
+    transform: translateY(clamp(2.5rem, 8vh, 4rem));
+  }
+
+  .stickyContainerCard .cardCaption {
+    font-size: clamp(1.1rem, 4.4vw, 1.5rem);
+    line-height: 1.18;
+    transform: translateY(clamp(2.5rem, 8vh, 4rem));
+  }
+
+  .cardStage {
+    align-items: flex-start;
+    padding-top: clamp(5.5rem, 18vh, 8rem);
+    box-sizing: border-box;
+    margin-top: 0;
+  }
+
+  .floatingCard {
+    transform: translateZ(0);
   }
 }
