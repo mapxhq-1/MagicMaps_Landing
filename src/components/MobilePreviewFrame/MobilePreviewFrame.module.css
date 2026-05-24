@@ -1,5 +1,5 @@
 .shell {
-  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,7 +41,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 24px 48px rgba(20, 20, 20, 0.22),
     0 48px 96px rgba(20, 20, 20, 0.14);
-  transform: scale(min(1, calc((100svh - 7rem) / var(--phone-h)), calc((100vw - 2rem) / var(--phone-w))));
+  transform: scale(min(1, calc((100dvh - 7rem) / var(--phone-h)), calc((100vw - 2rem) / var(--phone-w))));
   transform-origin: center center;
 }
 

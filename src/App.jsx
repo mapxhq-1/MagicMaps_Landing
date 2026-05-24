@@ -146,7 +146,7 @@ function App() {
     <div
       style={{
         position: 'relative',
-        minHeight: showPhoneFrame ? '100%' : '100vh',
+        minHeight: showPhoneFrame ? '100%' : '100dvh',
         width: '100%',
         overflowX: 'clip',
       }}
