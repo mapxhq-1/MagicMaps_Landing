@@ -56,6 +56,8 @@ export default function MobileFeatureCardsSection() {
             key={card.src}
             className={styles.desktopFeatureCard}
             style={getCardStyle(index)}
+            loading="lazy"
+            decoding="async"
             src={card.src}
             alt={card.alt}
           />

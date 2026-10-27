@@ -2,13 +2,19 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import NeonCtaButton from '../NeonCtaButton/NeonCtaButton';
+import RotatingWord from './RotatingWord';
 import { createCanvasScrollRenderer } from '../../utils/canvasScrollFrame';
+import { createImageSequenceLoader } from '../../utils/imageSequenceLoader';
 import styles from './ScrollVideo.module.css';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const ROTATING_WORDS = ['Thinks', 'Reacts', 'Revises'];
+const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
+  a.length >= b.length ? a : b,
+);
 
 export default function ScrollImageSequence({ frameCount, framePath }) {
   const containerRef = useRef(null);
@@ -18,88 +24,74 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
   const [isReady, setIsReady] = useState(false);
   const [hasFirstFrame, setHasFirstFrame] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [isNearViewport, setIsNearViewport] = useState(false);
 
-  const imagesRef = useRef([]);
+  const loaderRef = useRef(null);
+  const retryCurrentRenderRef = useRef(null);
 
-  // Rotating words
-  const [wordIndex, setWordIndex] = useState(0);
-
-  const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
-
-  const longestWord = rotatingWords.reduce((a, b) =>
-    a.length >= b.length ? a : b,
-  );
-
-  // Rotate words
+  // Do not let the lower sequence compete with the content currently on screen.
   useEffect(() => {
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % rotatingWords.length);
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Load image sequence
-  useEffect(() => {
-    let cancelled = false;
-
-    const images = new Array(frameCount);
-
-    let loadedCount = 0;
-
-    const onFrameLoaded = (index, img) => {
-      if (cancelled) return;
-
-      loadedCount += 1;
-
-      const progress = Math.round((loadedCount / frameCount) * 100);
-
-      setLoadProgress(progress);
-
-      if (index === 0 && canvasRef.current) {
-        const canvas = canvasRef.current;
-
-        const ctx = canvas.getContext('2d', { alpha: false });
-
-        if (ctx) {
-          canvas.width = img.width;
-          canvas.height = img.height;
-
-          ctx.imageSmoothingEnabled = false;
-
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          setHasFirstFrame(true);
-        }
-      }
-
-      if (loadedCount === frameCount) {
-        setIsReady(true);
-      }
-    };
-
-    for (let i = 1; i <= frameCount; i += 1) {
-      const img = new Image();
-
-      const index = i - 1;
-
-      const paddedIndex = String(i).padStart(4, '0');
-
-      img.decoding = 'async';
-
-      img.src = `${framePath}${paddedIndex}.jpg`;
-
-      img.onload = () => onFrameLoaded(index, img);
-
-      images[index] = img;
+    const container = containerRef.current;
+    if (!container || !('IntersectionObserver' in window)) {
+      const fallbackTimer = window.setTimeout(() => setIsNearViewport(true), 0);
+      return () => window.clearTimeout(fallbackTimer);
     }
 
-    imagesRef.current = images;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200% 0px' },
+    );
+    observer.observe(container);
 
     return () => {
-      cancelled = true;
+      observer.disconnect();
     };
-  }, [frameCount, framePath]);
+  }, []);
+
+  // Decode only a rolling window around the requested scroll frame.
+  useEffect(() => {
+    if (!isNearViewport) return undefined;
+
+    const loader = createImageSequenceLoader({
+      frameCount,
+      getFrameSources: (index) => {
+        const frameNumber = String(index + 1).padStart(4, '0');
+        return [`${framePath}${frameNumber}.webp`];
+      },
+      onFrameReady: (index, frame) => {
+        if (index === 0 && canvasRef.current) {
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d', { alpha: false });
+
+          if (ctx) {
+            canvas.width = frame.width;
+            canvas.height = frame.height;
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+            setLoadProgress(100);
+            setHasFirstFrame(true);
+            setIsReady(true);
+          }
+        }
+
+        retryCurrentRenderRef.current?.();
+      },
+    });
+
+    loaderRef.current = loader;
+    loader.requestWindow(0, 1);
+
+    return () => {
+      retryCurrentRenderRef.current = null;
+      loader.dispose();
+      loaderRef.current = null;
+    };
+  }, [frameCount, framePath, isNearViewport]);
 
   // Scroll animation
   useGSAP(
@@ -116,8 +108,6 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
       ctx.imageSmoothingEnabled = false;
 
-      const images = imagesRef.current;
-
       const frameStepForVelocity = (velocity) => {
         const v = Math.abs(velocity);
 
@@ -127,6 +117,10 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
         return 1;
       };
+
+      let latestProgress = 0;
+      let latestVelocity = 0;
+      let lastRequestedFrame = 0;
 
       const renderer = createCanvasScrollRenderer(
         (progress, velocity, lastFrame) => {
@@ -139,17 +133,35 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
             Math.floor(rawIndex / step) * step,
           );
 
-          if (frameIndex === lastFrame) return -1;
+          const loader = loaderRef.current;
+          if (!loader) return -1;
 
-          const img = images[frameIndex];
-
-          if (img?.complete) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          if (frameIndex !== lastRequestedFrame) {
+            const direction = frameIndex < lastRequestedFrame ? -1 : 1;
+            lastRequestedFrame = frameIndex;
+            loader.requestWindow(frameIndex, direction);
           }
 
-          return frameIndex;
+          const closest = loader.getClosestFrame(frameIndex);
+          if (!closest || closest.index === lastFrame) return -1;
+
+          ctx.drawImage(closest.frame, 0, 0, canvas.width, canvas.height);
+          return closest.index;
         },
       );
+
+      const retryCurrentRender = () => {
+        renderer.render(latestProgress, latestVelocity);
+      };
+      retryCurrentRenderRef.current = retryCurrentRender;
+
+      const setHintOpacity = scrollHintRef.current
+        ? gsap.quickTo(scrollHintRef.current, 'opacity', {
+          duration: 0.25,
+          ease: 'power2.out',
+        })
+        : null;
+      let hintIsVisible = true;
 
       const trigger = ScrollTrigger.create({
         trigger: containerRef.current,
@@ -161,14 +173,14 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
         invalidateOnRefresh: true,
 
         onUpdate: (self) => {
-          renderer.render(self.progress, self.getVelocity());
+          latestProgress = self.progress;
+          latestVelocity = self.getVelocity();
+          renderer.render(latestProgress, latestVelocity);
 
-          if (scrollHintRef.current) {
-            gsap.to(scrollHintRef.current, {
-              opacity: self.progress > 0.03 ? 0 : 1,
-              duration: 0.25,
-              ease: 'power2.out',
-            });
+          const shouldShowHint = self.progress <= 0.03;
+          if (setHintOpacity && shouldShowHint !== hintIsVisible) {
+            hintIsVisible = shouldShowHint;
+            setHintOpacity(shouldShowHint ? 1 : 0);
           }
         },
       });
@@ -183,6 +195,9 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
       });
 
       return () => {
+        if (retryCurrentRenderRef.current === retryCurrentRender) {
+          retryCurrentRenderRef.current = null;
+        }
         renderer.dispose();
         trigger.kill();
       };
@@ -200,53 +215,16 @@ export default function ScrollImageSequence({ frameCount, framePath }) {
 
             <span className={styles.heroWordSlot}>
               <span className={styles.heroWordMeasure} aria-hidden="true">
-                {longestWord}
+                {LONGEST_ROTATING_WORD}
               </span>
 
-              <span className={styles.heroWordInner}>
-                <span className={styles.heroWordArea}>
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={wordIndex}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{
-                        duration: 0.5,
-                        ease: 'easeInOut',
-                      }}
-                      className={styles.heroWord}
-                    >
-                      {rotatingWords[wordIndex]}
-                    </motion.span>
-                  </AnimatePresence>
-                </span>
-
-                <svg
-                  className={styles.heroMarkerUnderline}
-                  viewBox="0 0 120 18"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeMain}`}
-                    d="M2 14 C 22 13, 42 6, 60 5 S 98 6, 118 14"
-                  />
-
-                  <path
-                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeSoft}`}
-                    d="M4 15 C 24 14, 44 8, 60 7 S 96 8, 116 15"
-                  />
-                </svg>
-              </span>
+              <RotatingWord words={ROTATING_WORDS} />
             </span>
           </div>
         </div>
 
         <p className={styles.cardCaption}>
-          Specially for Competitive Exam
-          <br />
-          Aspirants !
+          Visual learning built for competitive exam aspirants.
         </p>
 
         <div className={styles.cardStage}>

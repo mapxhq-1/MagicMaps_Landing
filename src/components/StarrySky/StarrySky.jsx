@@ -1,55 +1,61 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import './StarrySky.css';
 
-export default function StarrySky({ showMountains = false }) {
-  const generateSvgStars = (count, size, opacityRange, usePaths = false) => {
-    const stars = [];
-    for (let i = 0; i < count; i++) {
-      const cx = (Math.random() * 100).toFixed(2) + '%';
-      const cy = (Math.random() * 100).toFixed(2) + '%';
-      const r = size + Math.random() * 1.0;
-      const opacity = opacityRange[0] + Math.random() * (opacityRange[1] - opacityRange[0]);
+function seededRandom(seed) {
+  const value = Math.sin(seed * 12.9898) * 43758.5453;
+  return value - Math.floor(value);
+}
 
-      const rand = Math.random();
-      let fill = '#ffffff';
-      if (rand > 0.8) fill = '#dbe7ff'; // light blue
-      else if (rand > 0.6) fill = '#fff8e7'; // light yellow
+function generateSvgStars(count, size, opacityRange, usePaths, seedOffset) {
+  const stars = [];
+  for (let i = 0; i < count; i++) {
+    const seed = seedOffset + i * 5;
+    const cx = `${(seededRandom(seed) * 100).toFixed(2)}%`;
+    const cy = `${(seededRandom(seed + 1) * 100).toFixed(2)}%`;
+    const r = size + seededRandom(seed + 2);
+    const opacity = opacityRange[0]
+      + seededRandom(seed + 3) * (opacityRange[1] - opacityRange[0]);
 
-      // Randomly assign a twinkle class so they blink like stars
-      const twinkleClass = rand > 0.7 ? 'twinkle-1' : rand > 0.4 ? 'twinkle-2' : 'twinkle-3';
+    const rand = seededRandom(seed + 4);
+    let fill = '#ffffff';
+    if (rand > 0.8) fill = '#dbe7ff';
+    else if (rand > 0.6) fill = '#fff8e7';
 
-      if (usePaths && rand > 0.5) {
-        const sr = r * 2.5; // sparkle radius
-        stars.push(
-          <svg key={i} x={cx} y={cy} style={{ overflow: 'visible' }} className={twinkleClass}>
-            <path
-              d={`M0,-${sr} Q0,0 ${sr},0 Q0,0 0,${sr} Q0,0 -${sr},0 Q0,0 0,-${sr} Z`}
-              fill={fill}
-              fillOpacity={opacity}
-            />
-          </svg>
-        );
-      } else {
-        stars.push(
-          <circle
-            key={i}
-            cx={cx}
-            cy={cy}
-            r={r}
+    const twinkleClass = rand > 0.7 ? 'twinkle-1' : rand > 0.4 ? 'twinkle-2' : 'twinkle-3';
+
+    if (usePaths && rand > 0.5) {
+      const sr = r * 2.5;
+      stars.push(
+        <svg key={i} x={cx} y={cy} style={{ overflow: 'visible' }} className={twinkleClass}>
+          <path
+            d={`M0,-${sr} Q0,0 ${sr},0 Q0,0 0,${sr} Q0,0 -${sr},0 Q0,0 0,-${sr} Z`}
             fill={fill}
             fillOpacity={opacity}
-            className={rand > 0.3 ? twinkleClass : ''}
           />
-        );
-      }
+        </svg>,
+      );
+    } else {
+      stars.push(
+        <circle
+          key={i}
+          cx={cx}
+          cy={cy}
+          r={r}
+          fill={fill}
+          fillOpacity={opacity}
+          className={rand > 0.3 ? twinkleClass : ''}
+        />,
+      );
     }
-    return stars;
-  };
+  }
+  return stars;
+}
 
+export default function StarrySky({ showMountains = false }) {
   // Generate 3 layers of stars for depth (larger layers use actual star shapes)
-  const starsLayer1 = useMemo(() => generateSvgStars(300, 0.5, [0.2, 0.6], false), []);
-  const starsLayer2 = useMemo(() => generateSvgStars(100, 1.0, [0.5, 0.9], true), []);
-  const starsLayer3 = useMemo(() => generateSvgStars(40, 1.5, [0.8, 1.0], true), []);
+  const starsLayer1 = useMemo(() => generateSvgStars(300, 0.5, [0.2, 0.6], false, 1000), []);
+  const starsLayer2 = useMemo(() => generateSvgStars(100, 1.0, [0.5, 0.9], true, 2000), []);
+  const starsLayer3 = useMemo(() => generateSvgStars(40, 1.5, [0.8, 1.0], true, 3000), []);
 
   const stars1Ref = useRef(null);
   const stars2Ref = useRef(null);

@@ -14,32 +14,58 @@ export default function ScrollVideo({ videoSrc }) {
   const videoRef = useRef(null);
   const scrollHintRef = useRef(null);
 
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState(null);
+  const isLoaded = loadedSrc === videoSrc;
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    if (!('IntersectionObserver' in window)) {
+      const fallbackTimer = window.setTimeout(() => setShouldLoad(true), 0);
+      return () => window.clearTimeout(fallbackTimer);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setShouldLoad(true);
+        observer.disconnect();
+      },
+      { rootMargin: '2000px 0px' },
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoad) return undefined;
+
     const video = videoRef.current;
     if (!video) return undefined;
 
     const onReady = () => {
+      video.removeEventListener('loadeddata', onReady);
       video.pause();
-      setIsLoaded(true);
+      setLoadedSrc(videoSrc);
     };
 
+    video.addEventListener('loadeddata', onReady, { once: true });
     video.src = videoSrc;
     video.load();
 
-    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
       onReady();
-    } else {
-      video.addEventListener('canplaythrough', onReady, { once: true });
     }
 
     return () => {
-      video.removeEventListener('canplaythrough', onReady);
+      video.removeEventListener('loadeddata', onReady);
       video.removeAttribute('src');
       video.load();
     };
-  }, [videoSrc]);
+  }, [shouldLoad, videoSrc]);
 
   useGSAP(
     () => {
@@ -53,6 +79,14 @@ export default function ScrollVideo({ videoSrc }) {
       const seeker = createVideoScrollSeeker(video);
       seeker.setDuration(duration);
 
+      const setHintOpacity = scrollHintRef.current
+        ? gsap.quickTo(scrollHintRef.current, 'opacity', {
+            duration: 0.25,
+            ease: 'power2.out',
+          })
+        : null;
+      let isHintHidden = false;
+
       const trigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
@@ -64,12 +98,10 @@ export default function ScrollVideo({ videoSrc }) {
         onUpdate: (self) => {
           seeker.seek(self.progress, self.getVelocity());
 
-          if (scrollHintRef.current) {
-            gsap.to(scrollHintRef.current, {
-              opacity: self.progress > 0.03 ? 0 : 1,
-              duration: 0.25,
-              ease: 'power2.out',
-            });
+          const shouldHideHint = self.progress > 0.03;
+          if (setHintOpacity && shouldHideHint !== isHintHidden) {
+            isHintHidden = shouldHideHint;
+            setHintOpacity(shouldHideHint ? 0 : 1);
           }
         },
       });
@@ -104,7 +136,7 @@ export default function ScrollVideo({ videoSrc }) {
             className={styles.video}
             playsInline
             muted
-            preload="auto"
+            preload={shouldLoad ? 'auto' : 'none'}
             disablePictureInPicture
             style={{ opacity: isLoaded ? 1 : 0 }}
           />

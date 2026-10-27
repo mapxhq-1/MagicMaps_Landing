@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle, Color } from 'ogl';
+import { subscribeScrollPerf } from '../../utils/scrollPerf';
 
 const vertexShader = `
 attribute vec2 position;
@@ -249,13 +250,21 @@ const Threads = ({
 
     function resize() {
       const { clientWidth, clientHeight } = container;
+      if (!clientWidth || !clientHeight) return;
       renderer.setSize(clientWidth, clientHeight);
       program.uniforms.iResolution.value.r = clientWidth;
       program.uniforms.iResolution.value.g = clientHeight;
       program.uniforms.iResolution.value.b = clientWidth / clientHeight;
     }
-    window.addEventListener('resize', resize);
     resize();
+
+    let resizeObserver = null;
+    if ('ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(container);
+    } else {
+      window.addEventListener('resize', resize);
+    }
 
     let currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
@@ -274,21 +283,13 @@ const Threads = ({
       container.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    let isVisible = true;
-    const visibilityObserver = new IntersectionObserver(
-      ([entry]) => {
-        isVisible = entry.isIntersecting;
-      },
-      { threshold: 0 },
-    );
-    visibilityObserver.observe(container);
+    let isVisible = false;
+    let isPageVisible = !document.hidden;
+    let isScrolling = false;
 
-    function update(t) {
-      if (!isVisible) {
-        animationFrameId.current = requestAnimationFrame(update);
-        return;
-      }
+    const canAnimate = () => isVisible && isPageVisible && !isScrolling;
 
+    const renderFrame = (time) => {
       if (enableMouseInteraction) {
         const smoothing = 0.05;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);
@@ -299,17 +300,63 @@ const Threads = ({
         program.uniforms.uMouse.value[0] = 0.5;
         program.uniforms.uMouse.value[1] = 0.5;
       }
-      program.uniforms.iTime.value = t * 0.001;
-
+      program.uniforms.iTime.value = time * 0.001;
       renderer.render({ scene: mesh });
+    };
+
+    const stopAnimation = () => {
+      if (animationFrameId.current != null) {
+        cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null;
+      }
+    };
+
+    function update(time) {
+      animationFrameId.current = null;
+      if (!canAnimate()) return;
+      renderFrame(time);
       animationFrameId.current = requestAnimationFrame(update);
     }
-    animationFrameId.current = requestAnimationFrame(update);
+
+    const startAnimation = () => {
+      if (!canAnimate() || animationFrameId.current != null) return;
+      animationFrameId.current = requestAnimationFrame(update);
+    };
+
+    const syncAnimation = () => {
+      if (canAnimate()) startAnimation();
+      else stopAnimation();
+    };
+
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible && isPageVisible) renderFrame(performance.now());
+        syncAnimation();
+      },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
+
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible && isVisible) renderFrame(performance.now());
+      syncAnimation();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const unsubscribeScroll = subscribeScrollPerf((scrolling) => {
+      isScrolling = scrolling;
+      syncAnimation();
+    });
 
     return () => {
       visibilityObserver.disconnect();
-      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-      window.removeEventListener('resize', resize);
+      unsubscribeScroll();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      stopAnimation();
+      if (resizeObserver) resizeObserver.disconnect();
+      else window.removeEventListener('resize', resize);
 
       if (enableMouseInteraction) {
         container.removeEventListener('mousemove', handleMouseMove);

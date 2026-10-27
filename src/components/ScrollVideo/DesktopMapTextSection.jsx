@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import RotatingWord from './RotatingWord';
 import styles from './ScrollVideo.module.css';
 
 const featuredCards = [
@@ -9,19 +9,14 @@ const featuredCards = [
   { src: '/cards/4_oraganize.png', alt: 'Organize learning card' },
 ];
 
+const ROTATING_WORDS = ['Thinks', 'Reacts', 'Revises'];
+const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
+  a.length >= b.length ? a : b,
+);
+
 export default function DesktopMapTextSection() {
-  const [wordIndex, setWordIndex] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const rotatingWords = ['Thinks', 'Reacts', 'Revises'];
-  const longestWord = rotatingWords.reduce((a, b) => (a.length >= b.length ? a : b));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % rotatingWords.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
 
   // Auto-advance cards in an infinite loop, pauses on hover
   useEffect(() => {
@@ -97,42 +92,12 @@ export default function DesktopMapTextSection() {
 
             <span className={styles.heroWordSlot}>
               <span className={styles.heroWordMeasure} aria-hidden="true">
-                {longestWord}
+                {LONGEST_ROTATING_WORD}
               </span>
-              <span className={styles.heroWordInner}>
-                <span className={styles.heroWordArea}>
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={wordIndex}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.5, ease: 'easeInOut' }}
-                      className={styles.heroWord}
-                    >
-                      {rotatingWords[wordIndex]}
-                    </motion.span>
-                  </AnimatePresence>
-                </span>
-                <svg
-                  className={styles.heroMarkerUnderline}
-                  viewBox="0 0 120 18"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeMain}`}
-                    d="M2 14 C 22 13, 42 6, 60 5 S 98 6, 118 14"
-                  />
-                  <path
-                    className={`${styles.heroMarkerStroke} ${styles.heroMarkerStrokeSoft}`}
-                    d="M4 15 C 24 14, 44 8, 60 7 S 96 8, 116 15"
-                  />
-                </svg>
-              </span>
+              <RotatingWord words={ROTATING_WORDS} />
             </span>
           </div>
-          <p className={styles.desktopMapCaption}>Specially for Competitive Exam Aspirants !</p>
+          <p className={styles.desktopMapCaption}>Visual learning built for competitive exam aspirants.</p>
         </div>
 
         {/* Deck wrapper with flanking arrow buttons */}
@@ -189,6 +154,8 @@ export default function DesktopMapTextSection() {
                 key={card.src}
                 className={styles.desktopFeatureCard}
                 style={getCardStyle(index)}
+                loading="lazy"
+                decoding="async"
                 onPointerMove={handleCardPointerMove}
                 onPointerLeave={handleCardPointerLeave}
                 src={card.src}

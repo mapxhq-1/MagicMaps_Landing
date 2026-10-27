@@ -17,7 +17,7 @@ import MobilePreviewFrame from './components/MobilePreviewFrame/MobilePreviewFra
 
 // New React Bits Components
 import DotGrid from './components/ReactBits/DotGrid'; // Adjust path as needed
-import Threads from './components/ReactBits/Threads'; // Adjust path as needed
+import DeferredThreads from './components/ReactBits/DeferredThreads';
 
 // Assets
 import vid1 from './assets/videos/vid1-kf.mp4';
@@ -125,15 +125,13 @@ function App() {
           </div>
 
           <div className="separator-band" aria-hidden="true">
-            <div className="threads-wrap">
-              <Threads
-                tricolor
-                amplitude={2.5}
-                distance={0.3}
-                lineWidth={20}
-                enableMouseInteraction={true}
-              />
-            </div>
+            <DeferredThreads
+              tricolor
+              amplitude={2.5}
+              distance={0.3}
+              lineWidth={20}
+              enableMouseInteraction={true}
+            />
           </div>
         </div>
 

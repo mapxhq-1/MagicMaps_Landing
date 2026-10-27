@@ -26,4 +26,10 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    files: ['encode.js', 'encodeV.js', 'ffmpegRunner.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])

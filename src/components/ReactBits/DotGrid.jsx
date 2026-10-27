@@ -44,6 +44,7 @@ const DotGrid = ({
   const canvasRef = useRef(null);
   const dotsRef = useRef([]);
   const isScrollingRef = useRef(false);
+  const requestPaintRef = useRef(() => {});
   const pointerRef = useRef({
     x: 0,
     y: 0,
@@ -105,7 +106,9 @@ const DotGrid = ({
         dots.push({ cx, cy, xOffset: 0, yOffset: 0, _inertiaApplied: false });
       }
     }
+    gsap.killTweensOf(dotsRef.current);
     dotsRef.current = dots;
+    requestPaintRef.current(true);
   }, [dotSize, gap]);
 
   useEffect(() => {
@@ -113,6 +116,7 @@ const DotGrid = ({
 
     let rafId = null;
     let running = true;
+    let pageVisible = !document.hidden;
     const proxSq = proximity * proximity;
 
     const paint = () => {
@@ -152,59 +156,80 @@ const DotGrid = ({
       }
     };
 
-    const loop = () => {
-      if (!running) return;
-      paint();
-      if (isScrollingRef.current) {
+    const requestPaint = (forceDuringScroll = false) => {
+      if (
+        !running ||
+        !pageVisible ||
+        rafId != null ||
+        (isScrollingRef.current && !forceDuringScroll)
+      ) return;
+      rafId = requestAnimationFrame(() => {
         rafId = null;
-        return;
-      }
-      rafId = requestAnimationFrame(loop);
+        paint();
+      });
     };
 
-    const resumeLoop = () => {
-      if (!running || rafId != null) return;
-      rafId = requestAnimationFrame(loop);
-    };
+    requestPaintRef.current = requestPaint;
 
     const unsubScroll = subscribeScrollPerf((scrolling) => {
       isScrollingRef.current = scrolling;
-      if (scrolling) {
-        if (rafId != null) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-        paint();
-      } else {
-        resumeLoop();
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
       }
+      requestPaint(true);
     });
 
-    loop();
+    const handleVisibilityChange = () => {
+      pageVisible = !document.hidden;
+      if (!pageVisible && rafId != null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (pageVisible) {
+        requestPaint(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    requestPaint();
 
     return () => {
       running = false;
       unsubScroll();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (rafId != null) cancelAnimationFrame(rafId);
+      requestPaintRef.current = () => {};
     };
   }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
 
   useEffect(() => {
     buildGrid();
     let ro = null;
+    let resizeRaf = null;
+    const scheduleBuild = () => {
+      if (resizeRaf != null) return;
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = null;
+        buildGrid();
+      });
+    };
     if ('ResizeObserver' in window) {
-      ro = new ResizeObserver(buildGrid);
+      ro = new ResizeObserver(scheduleBuild);
       wrapperRef.current && ro.observe(wrapperRef.current);
     } else {
-      window.addEventListener('resize', buildGrid);
+      window.addEventListener('resize', scheduleBuild);
     }
     return () => {
       if (ro) ro.disconnect();
-      else window.removeEventListener('resize', buildGrid);
+      else window.removeEventListener('resize', scheduleBuild);
+      if (resizeRaf != null) cancelAnimationFrame(resizeRaf);
     };
   }, [buildGrid]);
 
   useEffect(() => {
+    const proximitySq = proximity * proximity;
+    const shockRadiusSq = shockRadius * shockRadius;
+
     const onMove = e => {
       if (isScrollingRef.current) return;
       const now = performance.now();
@@ -232,9 +257,13 @@ const DotGrid = ({
       pr.x = e.clientX - rect.left;
       pr.y = e.clientY - rect.top;
 
+      requestPaintRef.current();
+
       for (const dot of dotsRef.current) {
-        const dist = Math.hypot(dot.cx - pr.x, dot.cy - pr.y);
-        if (speed > speedTrigger && dist < proximity && !dot._inertiaApplied) {
+        const dotDx = dot.cx - pr.x;
+        const dotDy = dot.cy - pr.y;
+        const distSq = dotDx * dotDx + dotDy * dotDy;
+        if (speed > speedTrigger && distSq < proximitySq && !dot._inertiaApplied) {
           dot._inertiaApplied = true;
           gsap.killTweensOf(dot);
           
@@ -247,12 +276,14 @@ const DotGrid = ({
             yOffset: pushY,
             duration: 0.25, 
             ease: "power2.out",
+            onUpdate: () => requestPaintRef.current(),
             onComplete: () => {
               gsap.to(dot, {
                 xOffset: 0,
                 yOffset: 0,
                 duration: returnDuration,
                 ease: 'elastic.out(1,0.75)',
+                onUpdate: () => requestPaintRef.current(),
                 onComplete: () => {
                   dot._inertiaApplied = false;
                 }
@@ -268,8 +299,11 @@ const DotGrid = ({
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
       for (const dot of dotsRef.current) {
-        const dist = Math.hypot(dot.cx - cx, dot.cy - cy);
-        if (dist < shockRadius && !dot._inertiaApplied) {
+        const dotDx = dot.cx - cx;
+        const dotDy = dot.cy - cy;
+        const distSq = dotDx * dotDx + dotDy * dotDy;
+        if (distSq < shockRadiusSq && !dot._inertiaApplied) {
+          const dist = Math.sqrt(distSq);
           dot._inertiaApplied = true;
           gsap.killTweensOf(dot);
           const falloff = Math.max(0, 1 - dist / shockRadius);
@@ -283,12 +317,14 @@ const DotGrid = ({
             yOffset: pushY,
             duration: 0.2, 
             ease: "power3.out",
+            onUpdate: () => requestPaintRef.current(),
             onComplete: () => {
               gsap.to(dot, {
                 xOffset: 0,
                 yOffset: 0,
                 duration: returnDuration,
                 ease: 'elastic.out(1,0.75)',
+                onUpdate: () => requestPaintRef.current(),
                 onComplete: () => {
                   dot._inertiaApplied = false;
                 }
@@ -306,6 +342,7 @@ const DotGrid = ({
     return () => {
       window.removeEventListener('mousemove', throttledMove);
       window.removeEventListener('click', onClick);
+      gsap.killTweensOf(dotsRef.current);
     };
   }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength]);
 
